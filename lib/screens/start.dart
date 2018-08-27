@@ -32,7 +32,7 @@ class StartScreen extends StatelessWidget {
 
               Container(
                 padding: EdgeInsets.only(top: 20.0, bottom: 50.0, left: 20.0, right: 20.0),
-                child: Text(locationStatusText(model.locationStatus), style: TextStyle(fontSize: 24.0), textAlign: TextAlign.center,),
+                child: Text(locationStatusText(model.status), style: TextStyle(fontSize: 24.0), textAlign: TextAlign.center,),
               ),
 
             ],
@@ -44,17 +44,17 @@ class StartScreen extends StatelessWidget {
   }
 
 
-  String locationStatusText(LocationStatus locationStatus) {
+  String locationStatusText(Status locationStatus) {
     switch(locationStatus) {
-      case LocationStatus.location_failed:
+      case Status.location_failed:
         return 'Unable to get location. Please check your settings.';
-      case LocationStatus.querying_events:
+      case Status.querying_events:
         return 'Looking for nearby events...';
-      case LocationStatus.events_failed:
+      case Status.events_failed:
         return 'Error finding events. Please try again later.';
-      case LocationStatus.done:
+      case Status.done:
         return 'Success!';
-      case LocationStatus.querying_location:
+      case Status.querying_location:
         return 'Querying location...';
       default:
       return 'Loading...';
