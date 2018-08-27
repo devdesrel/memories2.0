@@ -17,7 +17,7 @@ class StartScreen extends StatelessWidget {
             children: [
               Container(
                 padding: EdgeInsets.only(top: 50.0),
-                child: GestureDetector(child: Image.asset('assets/camera.png', width: 250.0,), onTap: () => model.locationStatus = LocationStatus.location_failed),
+                child: Image.asset('assets/camera.png', width: 250.0,),
               ),
 
               Container(
@@ -27,7 +27,7 @@ class StartScreen extends StatelessWidget {
 
               Container(
                 padding: EdgeInsets.only(top: 80.0),
-                child: GestureDetector(child: Image.asset('assets/placeholder.png', width: 120.0,), onTap: () => model.locationStatus = LocationStatus.querying_events),
+                child: Image.asset('assets/placeholder.png', width: 120.0,),
               ),
 
               Container(
@@ -54,8 +54,10 @@ class StartScreen extends StatelessWidget {
         return 'Error finding events. Please try again later.';
       case LocationStatus.done:
         return 'Success!';
-      default:
+      case LocationStatus.querying_location:
         return 'Querying location...';
+      default:
+      return 'Loading...';
     }
   }
 

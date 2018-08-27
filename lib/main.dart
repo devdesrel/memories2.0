@@ -12,6 +12,7 @@ class MemoriesApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    model.refreshLocationAndEvents();
     return ScopedModel<MemoriesModel>(
       model: model,
       child: MaterialApp(
