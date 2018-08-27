@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:memories/model.dart';
-import 'package:memories/start.dart';
+import 'package:memories/screens/start.dart';
+import 'package:memories/screens/event.dart';
 
 
 class MemoriesApp extends StatelessWidget {
@@ -13,11 +14,16 @@ class MemoriesApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     model.refreshLocationAndEvents();
+//    model.addListener(() ->)
     return ScopedModel<MemoriesModel>(
       model: model,
       child: MaterialApp(
         title: 'Memories Brand',
-        home: StartScreen(),
+        initialRoute: '/',
+        routes: {
+          '/': (context) => StartScreen(),
+          '/event': (context) => EventScreen(),
+        },
       )
     );
   }
