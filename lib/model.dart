@@ -4,7 +4,7 @@ import 'package:scoped_model/scoped_model.dart';
 import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
 
-enum Status { location_pending, location_query, location_failed, events_query, events_failed, events_success, event_select }
+enum Status { loading, querying_location, query_location_failed, querying_events, query_events_failed, query_events_success }
 
 class Event {
   final String id;
@@ -32,7 +32,7 @@ class MemoriesModel extends Model {
 
   static const eventsUrl = "https://raw.githubusercontent.com/wongcain/memories-flutter/master/json/events.json";
 
-  var _status = Status.location_pending;
+  var _status = Status.loading;
 
   Status get status => _status;
 
@@ -63,10 +63,10 @@ class MemoriesModel extends Model {
 
   void refreshLocationAndEvents() async {
     print("Querying location...");
-    status = Status.location_query;
+    status = Status.querying_location;
     try {
       currentLocation = await Location().getLocation();
-      status = Status.events_query;
+      status = Status.querying_events;
 
       var client = new http.Client();
       client.get(eventsUrl).then((response) => handleEventsResponse(response));
@@ -74,7 +74,7 @@ class MemoriesModel extends Model {
     } on PlatformException catch(e) {
       print("Error querying location: $e");
       currentLocation = null;
-      status = Status.location_failed;
+      status = Status.query_location_failed;
     }
   }
 
@@ -82,11 +82,11 @@ class MemoriesModel extends Model {
     if (response.statusCode == 200) {
       print("statusCode: ${response.statusCode}\nbody: ${response.body}");
       events = Event.listFromJson(json.decode(response.body));
-      status = Status.events_success;
+      status = Status.query_events_success;
       print("Events: $events");
     } else {
       print("Error fetching events: ${response.statusCode} - ${response.body}");
-      status = Status.events_failed;
+      status = Status.query_events_failed;
     }
   }
 

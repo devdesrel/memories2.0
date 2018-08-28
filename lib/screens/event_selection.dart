@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:memories/model.dart';
 
-class EventScreen extends StatelessWidget {
+class EventSelectionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
 
     return ScopedModelDescendant<MemoriesModel>(
       builder: (context, child, model) =>  Scaffold(
-        body:
-        Center(
+        body: Center(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
