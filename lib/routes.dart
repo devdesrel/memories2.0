@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:memories/screens/event_selection.dart';
+import 'package:memories/screens/camera.dart';
 
 class Routes {
 
   static final eventSelectionScreen = SlideTransitionPageRouteBuilder(
           (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => EventSelectionScreen());
+
+  static final cameraScreen = SlideTransitionPageRouteBuilder(
+          (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => CameraScreen());
 
 }
 
