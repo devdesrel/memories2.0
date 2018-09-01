@@ -61,6 +61,15 @@ class MemoriesModel extends Model {
     notifyListeners();
   }
 
+  Event _currentEvent;
+
+  get currentEvent => _currentEvent;
+
+  set currentEvent(Event currentEvent) {
+    _currentEvent = currentEvent;
+    notifyListeners();
+  }
+
   void refreshLocationAndEvents() async {
     print("Querying location...");
     status = Status.querying_location;

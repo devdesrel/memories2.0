@@ -4,15 +4,18 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:memories/routes.dart';
+import 'package:scoped_model/scoped_model.dart';
+import 'package:memories/model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
 
-List<CameraDescription> cameras;
+Map<CameraLensDirection, CameraDescription> camerasMap = {};
 
 void startCamera(BuildContext context) async {
   // Fetch the available cameras before initializing the app.
   try {
-    cameras = await availableCameras();
+    List<CameraDescription> cameras = await availableCameras();
+    cameras.forEach((camera) => camerasMap[camera.lensDirection] = camera);
     Navigator.push(context, Routes.cameraScreen);
   } on CameraException catch (e) {
     logError(e.code, e.description);
@@ -26,24 +29,12 @@ class CameraScreen extends StatefulWidget {
   }
 }
 
-/// Returns a suitable camera icon for [direction].
-IconData getCameraLensIcon(CameraLensDirection direction) {
-  switch (direction) {
-    case CameraLensDirection.back:
-      return Icons.camera_rear;
-    case CameraLensDirection.front:
-      return Icons.camera_front;
-    case CameraLensDirection.external:
-      return Icons.camera;
-  }
-  throw new ArgumentError('Unknown lens direction');
-}
-
 void logError(String code, String message) =>
     print('Error: $code\nError Message: $message');
 
 class _CameraScreenState extends State<CameraScreen> {
   CameraController controller;
+  CameraDescription currentCamera;
   String imagePath;
   String videoPath;
   VideoPlayerController videoController;
@@ -52,46 +43,105 @@ class _CameraScreenState extends State<CameraScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   @override
+  void initState() {
+    super.initState();
+    if(camerasMap.containsKey(CameraLensDirection.back)) {
+      onNewCameraSelected(camerasMap[CameraLensDirection.back]);
+    } else if(camerasMap.containsKey(CameraLensDirection.front)) {
+      onNewCameraSelected(camerasMap[CameraLensDirection.front]);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      key: _scaffoldKey,
-      appBar: new AppBar(
-        title: const Text('Camera example'),
-      ),
-      body: new Column(
+    return ScopedModelDescendant<MemoriesModel>(
+        builder: (context, child, model) =>  Scaffold(
+          key: _scaffoldKey,
+          appBar: new AppBar(
+            leading: new IconButton(
+              icon: new Icon(Icons.keyboard_arrow_left),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            title: Text(model.currentEvent.name),
+            backgroundColor: Colors.black,
+          ),
+          body: new Column(
+            children: <Widget>[
+              new Expanded(
+                child: new Container(
+                  child: Stack(
+                    children: <Widget>[
+                      _cameraPreviewWidget(),
+                      _cameraTopActions(),
+                    ],
+                  ),
+                  decoration: new BoxDecoration(
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              _captureControlRowWidget(),
+            ],
+          ),
+        )
+    );
+  }
+
+  Widget _cameraTopActions() {
+    return Container(
+      child: Row(
         children: <Widget>[
-          new Expanded(
-            child: new Container(
-              child: new Padding(
-                padding: const EdgeInsets.all(1.0),
-                child: new Center(
-                  child: _cameraPreviewWidget(),
-                ),
-              ),
-              decoration: new BoxDecoration(
-                color: Colors.black,
-                border: new Border.all(
-                  color: controller != null && controller.value.isRecordingVideo
-                      ? Colors.redAccent
-                      : Colors.grey,
-                  width: 3.0,
-                ),
-              ),
-            ),
+          _galleryIconButton(),
+          Expanded(
+            child: Text(''),
           ),
-          _captureControlRowWidget(),
-          new Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: new Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                _cameraTogglesRowWidget(),
-                _thumbnailWidget(),
-              ],
-            ),
-          ),
+          _cameraDirectionIconButton(),
+          _flashIconButton(),
         ],
       ),
+      decoration: new BoxDecoration(
+        gradient: new LinearGradient(
+          begin: const Alignment(0.0, -1.0),
+          end: const Alignment(0.0, 0.6),
+          colors: <Color>[
+            const Color(0xff000000),
+            const Color(0x00000000)
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _cameraDirectionIconButton() {
+    if(currentCamera.lensDirection == CameraLensDirection.front && camerasMap.containsKey(CameraLensDirection.back)) {
+      return IconButton(
+        onPressed: () => onNewCameraSelected(camerasMap[CameraLensDirection.back]),
+        icon: new Icon(Icons.switch_camera),
+        color: Colors.white,
+      );
+    } else if (currentCamera.lensDirection == CameraLensDirection.back && camerasMap.containsKey(CameraLensDirection.front)){
+      return IconButton(
+        onPressed: () => onNewCameraSelected(camerasMap[CameraLensDirection.front]),
+        icon: new Icon(Icons.switch_camera),
+        color: Colors.white,
+      );
+    }
+    return null;
+  }
+
+  Widget _galleryIconButton() {
+    return IconButton(
+      onPressed: () => {},
+      icon: new Icon(Icons.photo_library),
+      color: Colors.white,
+    );
+  }
+
+  Widget _flashIconButton() {
+    return IconButton(
+      onPressed: () => {},
+      icon: new Icon(Icons.flash_off),
+      color: Colors.white,
     );
   }
 
@@ -99,11 +149,10 @@ class _CameraScreenState extends State<CameraScreen> {
   Widget _cameraPreviewWidget() {
     if (controller == null || !controller.value.isInitialized) {
       return const Text(
-        'Tap a camera',
+        'Initializing...',
         style: TextStyle(
           color: Colors.white,
-          fontSize: 24.0,
-          fontWeight: FontWeight.w900,
+          fontSize: 12.0,
         ),
       );
     } else {
@@ -179,34 +228,6 @@ class _CameraScreenState extends State<CameraScreen> {
     );
   }
 
-  /// Display a row of toggle to select the camera (or a message if no camera is available).
-  Widget _cameraTogglesRowWidget() {
-    final List<Widget> toggles = <Widget>[];
-
-    if (cameras.isEmpty) {
-      return const Text('No camera found');
-    } else {
-      for (CameraDescription cameraDescription in cameras) {
-        toggles.add(
-          new SizedBox(
-            width: 90.0,
-            child: new RadioListTile<CameraDescription>(
-              title:
-                  new Icon(getCameraLensIcon(cameraDescription.lensDirection)),
-              groupValue: controller?.description,
-              value: cameraDescription,
-              onChanged: controller != null && controller.value.isRecordingVideo
-                  ? null
-                  : onNewCameraSelected,
-            ),
-          ),
-        );
-      }
-    }
-
-    return new Row(children: toggles);
-  }
-
   String timestamp() => new DateTime.now().millisecondsSinceEpoch.toString();
 
   void showInSnackBar(String message) {
@@ -235,7 +256,9 @@ class _CameraScreenState extends State<CameraScreen> {
     }
 
     if (mounted) {
-      setState(() {});
+      setState(() {
+        currentCamera = cameraDescription;
+      });
     }
   }
 
@@ -357,14 +380,5 @@ class _CameraScreenState extends State<CameraScreen> {
   void _showCameraException(CameraException e) {
     logError(e.code, e.description);
     showInSnackBar('Error: ${e.code}\n${e.description}');
-  }
-}
-
-class CameraApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return new MaterialApp(
-      home: new CameraScreen(),
-    );
   }
 }

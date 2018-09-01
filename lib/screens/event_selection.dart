@@ -18,6 +18,7 @@ class EventSelectionScreen extends StatelessWidget {
             children: [
               GestureDetector(
                 onTap: () {
+                  model.currentEvent = model.events[0];
                   startCamera(context);
                 },
                 child: Container(
