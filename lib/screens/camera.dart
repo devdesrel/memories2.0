@@ -32,7 +32,7 @@ class CameraScreen extends StatefulWidget {
 void logError(String code, String message) =>
     print('Error: $code\nError Message: $message');
 
-class _CameraScreenState extends State<CameraScreen> {
+class _CameraScreenState extends State<CameraScreen> with TickerProviderStateMixin {
   CameraController controller;
   CameraDescription currentCamera;
   String imagePath;
@@ -40,12 +40,18 @@ class _CameraScreenState extends State<CameraScreen> {
   VideoPlayerController videoController;
   VoidCallback videoPlayerListener;
   bool videoMode = false;
+  AnimationController animationController;
 
+  static const int videoLengthSecs = 7;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
+    animationController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: videoLengthSecs),
+    );
     if (camerasMap.containsKey(CameraLensDirection.back)) {
       onNewCameraSelected(camerasMap[CameraLensDirection.back]);
     } else if (camerasMap.containsKey(CameraLensDirection.front)) {
@@ -221,11 +227,13 @@ class _CameraScreenState extends State<CameraScreen> {
     if (videoMode) {
       if (controller != null && controller.value.isRecordingVideo) {
         return FloatingActionButton(
-          child: Icon(
-            Icons.stop,
-            color: Colors.red,
+          child: Countdown(
+            animation: StepTween(
+              begin: videoLengthSecs + 1,
+              end: 0,
+            ).animate(animationController),
           ),
-          backgroundColor: Colors.white,
+          backgroundColor: Colors.red,
           onPressed: controller != null &&
                   controller.value.isInitialized &&
                   controller.value.isRecordingVideo
@@ -353,6 +361,8 @@ class _CameraScreenState extends State<CameraScreen> {
     try {
       videoPath = filePath;
       await controller.startVideoRecording(filePath);
+      animationController.forward(from: 0.0);
+      Timer(Duration(seconds: videoLengthSecs), stopVideoRecording);
     } on CameraException catch (e) {
       _showCameraException(e);
       return null;
@@ -367,6 +377,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
     try {
       await controller.stopVideoRecording();
+      animationController.reset();
     } on CameraException catch (e) {
       _showCameraException(e);
       return null;
@@ -426,5 +437,18 @@ class _CameraScreenState extends State<CameraScreen> {
   void _showCameraException(CameraException e) {
     logError(e.code, e.description);
     showInSnackBar('Error: ${e.code}\n${e.description}');
+  }
+}
+
+class Countdown extends AnimatedWidget {
+  Countdown({ Key key, this.animation }) : super(key: key, listenable: animation);
+  Animation<int> animation;
+
+  @override
+  build(BuildContext context){
+    return new Text(
+      animation.value.toString(),
+      style: new TextStyle(fontSize: 24.0, color: Colors.white, fontWeight: FontWeight.bold),
+    );
   }
 }
