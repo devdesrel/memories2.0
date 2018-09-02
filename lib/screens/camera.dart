@@ -3,10 +3,10 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:memories/routes.dart';
-import 'package:scoped_model/scoped_model.dart';
 import 'package:memories/model.dart';
+import 'package:memories/routes.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:scoped_model/scoped_model.dart';
 import 'package:video_player/video_player.dart';
 
 Map<CameraLensDirection, CameraDescription> camerasMap = {};
@@ -25,7 +25,7 @@ void startCamera(BuildContext context) async {
 class CameraScreen extends StatefulWidget {
   @override
   _CameraScreenState createState() {
-    return new _CameraScreenState();
+    return _CameraScreenState();
   }
 }
 
@@ -39,15 +39,16 @@ class _CameraScreenState extends State<CameraScreen> {
   String videoPath;
   VideoPlayerController videoController;
   VoidCallback videoPlayerListener;
+  bool videoMode = false;
 
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
-    if(camerasMap.containsKey(CameraLensDirection.back)) {
+    if (camerasMap.containsKey(CameraLensDirection.back)) {
       onNewCameraSelected(camerasMap[CameraLensDirection.back]);
-    } else if(camerasMap.containsKey(CameraLensDirection.front)) {
+    } else if (camerasMap.containsKey(CameraLensDirection.front)) {
       onNewCameraSelected(camerasMap[CameraLensDirection.front]);
     }
   }
@@ -55,74 +56,80 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   Widget build(BuildContext context) {
     return ScopedModelDescendant<MemoriesModel>(
-        builder: (context, child, model) =>  Scaffold(
-          key: _scaffoldKey,
-          appBar: new AppBar(
-            leading: new IconButton(
-              icon: new Icon(Icons.keyboard_arrow_left),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            title: Text(model.currentEvent.name),
-            backgroundColor: Colors.black,
-          ),
-          body: new Column(
-            children: <Widget>[
-              new Expanded(
-                child: new Container(
-                  child: Stack(
-                    children: <Widget>[
-                      _cameraPreviewWidget(),
-                      _cameraTopActions(),
-                    ],
-                  ),
-                  decoration: new BoxDecoration(
-                    color: Colors.black,
-                  ),
+        builder: (context, child, model) => Scaffold(
+              key: _scaffoldKey,
+              appBar: AppBar(
+                leading: IconButton(
+                  icon: Icon(Icons.keyboard_arrow_left),
+                  onPressed: () => Navigator.of(context).pop(),
                 ),
+                title: Text(model.currentEvent.name),
+                backgroundColor: Colors.black,
               ),
-              _captureControlRowWidget(),
-            ],
-          ),
-        )
-    );
+              body: Column(
+                children: <Widget>[
+                  Expanded(
+                    child: Container(
+                      child: Stack(
+                        children: <Widget>[
+                          _cameraPreviewWidget(),
+                          _cameraTopActions(),
+                        ],
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    child: _captureControlRowWidget(),
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ));
   }
 
   Widget _cameraTopActions() {
     return Container(
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           _galleryIconButton(),
           Expanded(
             child: Text(''),
           ),
           _cameraDirectionIconButton(),
-          _flashIconButton(),
+//         TODO _flashIconButton(),
         ],
       ),
-      decoration: new BoxDecoration(
-        gradient: new LinearGradient(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
           begin: const Alignment(0.0, -1.0),
           end: const Alignment(0.0, 0.6),
-          colors: <Color>[
-            const Color(0xff000000),
-            const Color(0x00000000)
-          ],
+          colors: <Color>[const Color(0xff000000), const Color(0x00000000)],
         ),
       ),
     );
   }
 
   Widget _cameraDirectionIconButton() {
-    if(currentCamera.lensDirection == CameraLensDirection.front && camerasMap.containsKey(CameraLensDirection.back)) {
+    if (currentCamera.lensDirection == CameraLensDirection.front &&
+        camerasMap.containsKey(CameraLensDirection.back)) {
       return IconButton(
-        onPressed: () => onNewCameraSelected(camerasMap[CameraLensDirection.back]),
-        icon: new Icon(Icons.switch_camera),
+        onPressed: () =>
+            onNewCameraSelected(camerasMap[CameraLensDirection.back]),
+        icon: Icon(Icons.camera_rear),
         color: Colors.white,
       );
-    } else if (currentCamera.lensDirection == CameraLensDirection.back && camerasMap.containsKey(CameraLensDirection.front)){
+    } else if (currentCamera.lensDirection == CameraLensDirection.back &&
+        camerasMap.containsKey(CameraLensDirection.front)) {
       return IconButton(
-        onPressed: () => onNewCameraSelected(camerasMap[CameraLensDirection.front]),
-        icon: new Icon(Icons.switch_camera),
+        onPressed: () =>
+            onNewCameraSelected(camerasMap[CameraLensDirection.front]),
+        icon: Icon(Icons.camera_front),
         color: Colors.white,
       );
     }
@@ -132,18 +139,19 @@ class _CameraScreenState extends State<CameraScreen> {
   Widget _galleryIconButton() {
     return IconButton(
       onPressed: () => {},
-      icon: new Icon(Icons.photo_library),
+      icon: Icon(Icons.photo_library),
       color: Colors.white,
     );
   }
 
-  Widget _flashIconButton() {
-    return IconButton(
-      onPressed: () => {},
-      icon: new Icon(Icons.flash_off),
-      color: Colors.white,
-    );
-  }
+//  TODO
+//  Widget _flashIconButton() {
+//    return IconButton(
+//      onPressed: () => {},
+//      icon: Icon(Icons.flash_off),
+//      color: Colors.white,
+//    );
+//  }
 
   /// Display the preview from the camera (or a message if the preview is not available).
   Widget _cameraPreviewWidget() {
@@ -156,90 +164,131 @@ class _CameraScreenState extends State<CameraScreen> {
         ),
       );
     } else {
-      return new AspectRatio(
+      return AspectRatio(
         aspectRatio: controller.value.aspectRatio,
-        child: new CameraPreview(controller),
+        child: CameraPreview(controller),
       );
     }
   }
 
+  /// Display the control bar with buttons to take pictures and record videos.
+  Widget _captureControlRowWidget() {
+    return Padding(
+        padding: new EdgeInsets.all(8.0),
+        child: Stack(
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                _thumbnailWidget(),
+                _cameraVideoToggleButton(),
+              ],
+            ),
+            Center(
+              child: _cameraPrimaryActionButton(),
+            )
+          ],
+        ));
+  }
+
   /// Display the thumbnail of the captured image or video.
   Widget _thumbnailWidget() {
-    return new Expanded(
-      child: new Align(
+    return new Align(
         alignment: Alignment.centerRight,
         child: videoController == null && imagePath == null
-            ? null
-            : new SizedBox(
-                child: (videoController == null)
-                    ? new Image.file(new File(imagePath))
-                    : new Container(
-                        child: new Center(
-                          child: new AspectRatio(
-                              aspectRatio: videoController.value.size != null
-                                  ? videoController.value.aspectRatio
-                                  : 1.0,
-                              child: new VideoPlayer(videoController)),
-                        ),
-                        decoration: new BoxDecoration(
-                            border: new Border.all(color: Colors.pink)),
+          ? null
+          : SizedBox(
+              child: (videoController == null)
+                  ? Image.file(File(imagePath))
+                  : Container(
+                      child: Center(
+                        child: AspectRatio(
+                            aspectRatio: videoController.value.size != null
+                                ? videoController.value.aspectRatio
+                                : 1.0,
+                            child: VideoPlayer(videoController)),
                       ),
-                width: 64.0,
-                height: 64.0,
-              ),
-      ),
+                      decoration:
+                          BoxDecoration(border: Border.all(color: Colors.pink)),
+                    ),
+              width: 64.0,
+              height: 64.0,
+            ),
     );
   }
 
-  /// Display the control bar with buttons to take pictures and record videos.
-  Widget _captureControlRowWidget() {
-    return new Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      mainAxisSize: MainAxisSize.max,
-      children: <Widget>[
-        new IconButton(
-          icon: const Icon(Icons.camera_alt),
-          color: Colors.blue,
-          onPressed: controller != null &&
-                  controller.value.isInitialized &&
-                  !controller.value.isRecordingVideo
-              ? onTakePictureButtonPressed
-              : null,
-        ),
-        new IconButton(
-          icon: const Icon(Icons.videocam),
-          color: Colors.blue,
-          onPressed: controller != null &&
-                  controller.value.isInitialized &&
-                  !controller.value.isRecordingVideo
-              ? onVideoRecordButtonPressed
-              : null,
-        ),
-        new IconButton(
-          icon: const Icon(Icons.stop),
-          color: Colors.red,
+  Widget _cameraPrimaryActionButton() {
+    if (videoMode) {
+      if (controller != null && controller.value.isRecordingVideo) {
+        return FloatingActionButton(
+          child: Icon(
+            Icons.stop,
+            color: Colors.red,
+          ),
+          backgroundColor: Colors.white,
           onPressed: controller != null &&
                   controller.value.isInitialized &&
                   controller.value.isRecordingVideo
               ? onStopButtonPressed
               : null,
-        )
-      ],
-    );
+        );
+      } else {
+        return FloatingActionButton(
+            child: Icon(
+              Icons.videocam,
+              color: Colors.black,
+            ),
+            backgroundColor: Colors.white,
+            onPressed: controller != null &&
+                    controller.value.isInitialized &&
+                    !controller.value.isRecordingVideo
+                ? onVideoRecordButtonPressed
+                : null);
+      }
+    } else {
+      return FloatingActionButton(
+        child: Icon(Icons.camera_alt, color: Colors.black),
+        backgroundColor: Colors.white,
+        onPressed: controller != null &&
+                controller.value.isInitialized &&
+                !controller.value.isRecordingVideo
+            ? onTakePictureButtonPressed
+            : null,
+      );
+    }
   }
 
-  String timestamp() => new DateTime.now().millisecondsSinceEpoch.toString();
+  Widget _cameraVideoToggleButton() {
+    if (videoMode) {
+      return IconButton(
+        icon: Icon(Icons.camera_alt, color: Colors.white),
+        onPressed: onCameraVideoTogglePressed,
+      );
+    } else {
+      return IconButton(
+        icon: Icon(Icons.videocam, color: Colors.white),
+        onPressed: onCameraVideoTogglePressed,
+      );
+    }
+  }
+
+  String timestamp() => DateTime.now().millisecondsSinceEpoch.toString();
 
   void showInSnackBar(String message) {
-    _scaffoldKey.currentState
-        .showSnackBar(new SnackBar(content: new Text(message)));
+    _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  void onCameraVideoTogglePressed() {
+    setState(() {
+      videoMode = !videoMode;
+    });
   }
 
   void onNewCameraSelected(CameraDescription cameraDescription) async {
     if (controller != null) {
       await controller.dispose();
     }
-    controller = new CameraController(cameraDescription, ResolutionPreset.high);
+    controller = CameraController(cameraDescription, ResolutionPreset.high);
 
     // If the controller is updated then update the UI.
     controller.addListener(() {
@@ -270,7 +319,6 @@ class _CameraScreenState extends State<CameraScreen> {
           videoController?.dispose();
           videoController = null;
         });
-        if (filePath != null) showInSnackBar('Picture saved to $filePath');
       }
     });
   }
@@ -278,26 +326,23 @@ class _CameraScreenState extends State<CameraScreen> {
   void onVideoRecordButtonPressed() {
     startVideoRecording().then((String filePath) {
       if (mounted) setState(() {});
-      if (filePath != null) showInSnackBar('Saving video to $filePath');
     });
   }
 
   void onStopButtonPressed() {
     stopVideoRecording().then((_) {
       if (mounted) setState(() {});
-      showInSnackBar('Video recorded to: $videoPath');
     });
   }
 
   Future<String> startVideoRecording() async {
     if (!controller.value.isInitialized) {
-      showInSnackBar('Error: select a camera first.');
       return null;
     }
 
     final Directory extDir = await getApplicationDocumentsDirectory();
     final String dirPath = '${extDir.path}/Movies/flutter_test';
-    await new Directory(dirPath).create(recursive: true);
+    await Directory(dirPath).create(recursive: true);
     final String filePath = '$dirPath/${timestamp()}.mp4';
 
     if (controller.value.isRecordingVideo) {
@@ -332,7 +377,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
   Future<void> _startVideoPlayer() async {
     final VideoPlayerController vcontroller =
-        new VideoPlayerController.file(new File(videoPath));
+        VideoPlayerController.file(File(videoPath));
     videoPlayerListener = () {
       if (videoController != null && videoController.value.size != null) {
         // Refreshing the state to update video player with the correct ratio.
@@ -341,6 +386,7 @@ class _CameraScreenState extends State<CameraScreen> {
       }
     };
     vcontroller.addListener(videoPlayerListener);
+    await vcontroller.setVolume(0.0);
     await vcontroller.setLooping(true);
     await vcontroller.initialize();
     await videoController?.dispose();
@@ -360,7 +406,7 @@ class _CameraScreenState extends State<CameraScreen> {
     }
     final Directory extDir = await getApplicationDocumentsDirectory();
     final String dirPath = '${extDir.path}/Pictures/flutter_test';
-    await new Directory(dirPath).create(recursive: true);
+    await Directory(dirPath).create(recursive: true);
     final String filePath = '$dirPath/${timestamp()}.jpg';
 
     if (controller.value.isTakingPicture) {

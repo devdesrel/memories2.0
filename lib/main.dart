@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:memories/model.dart';
 import 'package:memories/screens/start.dart';
@@ -12,6 +13,10 @@ class MemoriesApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     model.refreshLocationAndEvents();
     return ScopedModel<MemoriesModel>(
       model: model,
