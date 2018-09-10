@@ -4,7 +4,15 @@ import 'package:scoped_model/scoped_model.dart';
 import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
 
-enum Status { loading, querying_location, query_location_failed, querying_events, query_events_failed, query_events_success }
+enum Status {
+  loading,
+  querying_location,
+  query_location_failed,
+  querying_events,
+  query_events_failed,
+  query_events_success,
+  event_selection
+}
 
 class Event {
   final String id;
