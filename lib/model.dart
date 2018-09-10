@@ -11,6 +11,7 @@ enum Status {
   querying_events,
   query_events_failed,
   query_events_success,
+  event_selection_anim,
   event_selection
 }
 
