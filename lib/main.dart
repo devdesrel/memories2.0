@@ -1,15 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:scoped_model/scoped_model.dart';
-import 'package:memories/model.dart';
 import 'package:memories/screens/start.dart';
 
 
 class MemoriesApp extends StatelessWidget {
-
-  final MemoriesModel model;
-
-  const MemoriesApp({Key key, @required this.model}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -17,13 +11,9 @@ class MemoriesApp extends StatelessWidget {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    model.refreshLocationAndEvents();
-    return ScopedModel<MemoriesModel>(
-      model: model,
-      child: MaterialApp(
+    return MaterialApp(
         title: 'Memories Brand',
         home: StartScreen()
-      )
     );
   }
 
@@ -31,7 +21,7 @@ class MemoriesApp extends StatelessWidget {
 
 void main() {
   runApp(
-    MemoriesApp(model: MemoriesModel(),),
+    MemoriesApp(),
   );
 }
 

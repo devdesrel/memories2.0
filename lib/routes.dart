@@ -1,12 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:memories/screens/camera.dart';
 
-class Routes {
-
-  static final cameraScreen = SlideTransitionPageRouteBuilder(
-          (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => CameraScreen());
-
-}
 
 class SlideTransitionPageRouteBuilder extends PageRouteBuilder {
 

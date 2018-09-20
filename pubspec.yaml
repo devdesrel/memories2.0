@@ -4,7 +4,6 @@ description: Memories Photo App
 dependencies:
   flutter:
     sdk: flutter
-  scoped_model: ^0.3.0
   location: ^1.4.1
   http: ^0.11.3
   camera: ^0.2.3

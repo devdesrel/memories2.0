@@ -6,33 +6,43 @@ import 'package:flutter/material.dart';
 import 'package:memories/model.dart';
 import 'package:memories/routes.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:scoped_model/scoped_model.dart';
 import 'package:video_player/video_player.dart';
 
 Map<CameraLensDirection, CameraDescription> camerasMap = {};
 
-void startCamera(BuildContext context) async {
-  // Fetch the available cameras before initializing the app.
-  try {
-    List<CameraDescription> cameras = await availableCameras();
-    cameras.forEach((camera) => camerasMap[camera.lensDirection] = camera);
-    Navigator.push(context, Routes.cameraScreen);
-  } on CameraException catch (e) {
-    logError(e.code, e.description);
-  }
-}
-
 class CameraScreen extends StatefulWidget {
+
+  CameraScreen({Key key, @required this.event}): super(key: key);
+
+  final Event event;
+
   @override
   _CameraScreenState createState() {
-    return _CameraScreenState();
+    var state = _CameraScreenState();
+    state.event = event;
+    return state;
   }
+
+  static void startForEvent(BuildContext context, Event event) async {
+    // Fetch the available cameras before initializing the app.
+    try {
+      List<CameraDescription> cameras = await availableCameras();
+      cameras.forEach((camera) => camerasMap[camera.lensDirection] = camera);
+      Navigator.push(context, SlideTransitionPageRouteBuilder(
+              (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => CameraScreen(event: event,)));
+    } on CameraException catch (e) {
+      logError(e.code, e.description);
+    }
+  }
+
 }
 
 void logError(String code, String message) =>
     print('Error: $code\nError Message: $message');
 
 class _CameraScreenState extends State<CameraScreen> with TickerProviderStateMixin {
+
+  Event event;
   CameraController controller;
   CameraDescription currentCamera;
   String imagePath;
@@ -61,41 +71,40 @@ class _CameraScreenState extends State<CameraScreen> with TickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    return ScopedModelDescendant<MemoriesModel>(
-        builder: (context, child, model) => Scaffold(
-              key: _scaffoldKey,
-              appBar: AppBar(
-                leading: IconButton(
-                  icon: Icon(Icons.keyboard_arrow_left),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-                title: Text(model.currentEvent.name),
-                backgroundColor: Colors.black,
-              ),
-              body: Column(
+    return Scaffold(
+      key: _scaffoldKey,
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.keyboard_arrow_left),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text(event.name),
+        backgroundColor: Colors.black,
+      ),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: Container(
+              child: Stack(
                 children: <Widget>[
-                  Expanded(
-                    child: Container(
-                      child: Stack(
-                        children: <Widget>[
-                          _cameraPreviewWidget(),
-                          _cameraTopActions(),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    child: _captureControlRowWidget(),
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                    ),
-                  ),
+                  _cameraPreviewWidget(),
+                  _cameraTopActions(),
                 ],
               ),
-            ));
+              decoration: BoxDecoration(
+                color: Colors.black,
+              ),
+            ),
+          ),
+          Container(
+            child: _captureControlRowWidget(),
+            decoration: BoxDecoration(
+              color: Colors.black,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _cameraTopActions() {

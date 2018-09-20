@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
+import 'package:flutter/services.dart';
+import 'package:location/location.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:memories/model.dart';
-import 'package:memories/routes.dart';
-import 'package:scoped_model/scoped_model.dart';
+import 'package:memories/screens/camera.dart';
 
 class StartScreen extends StatefulWidget {
   @override
@@ -13,8 +16,12 @@ class StartScreen extends StatefulWidget {
 
 class _StartScreenState extends State<StartScreen>
     with SingleTickerProviderStateMixin {
+  Status status = Status.loading;
   Animation<double> logoSizeAnim;
   AnimationController logoAnimCtrl;
+  Map<String, double> currentLocation;
+  List<Event> events;
+  Event currentEvent;
 
   bool isAnimPending() {
     return !logoAnimCtrl.isCompleted &&
@@ -22,10 +29,59 @@ class _StartScreenState extends State<StartScreen>
         !logoAnimCtrl.isDismissed;
   }
 
+
+  void refreshLocationAndEvents() async {
+    print("Querying location...");
+    setState(() {
+      status = Status.querying_location;
+    });
+    try {
+      var location = await Location().getLocation();
+      setState((){
+        currentLocation = location;
+        status = Status.querying_events;
+      });
+
+      var client = new http.Client();
+      client.get(eventsUrl).then((response) => handleEventsResponse(response));
+
+    } on PlatformException catch(e) {
+      print("Error querying location: $e");
+      setState((){
+        currentLocation = null;
+        status = Status.query_location_failed;
+      });
+    }
+  }
+
+  void handleEventsResponse(http.Response response) {
+    if (response.statusCode == 200) {
+      print("statusCode: ${response.statusCode}\nbody: ${response.body}");
+      print("Events: $events");
+      setState(() {
+        events = Event.listFromJson(json.decode(response.body));
+        status = Status.query_events_success;
+      });
+    } else {
+      print("Error fetching events: ${response.statusCode} - ${response.body}");
+      setState(() {
+        status = Status.query_events_failed;
+      });
+    }
+  }
+
+  void startAnim(){
+    setState(() {
+      status = Status.event_selection_anim;
+    });
+  }
+
+
   @override
   void initState() {
     print('START INIT STATE');
     super.initState();
+    refreshLocationAndEvents();
     logoAnimCtrl = AnimationController(
         duration: const Duration(milliseconds: 500), vsync: this);
     logoSizeAnim = Tween(begin: 200.0, end: 120.0).animate(logoAnimCtrl)
@@ -36,32 +92,28 @@ class _StartScreenState extends State<StartScreen>
 
   @override
   Widget build(BuildContext context) {
-    return ScopedModelDescendant<MemoriesModel>(
-      builder: (context, child, model) => initWidget(context, child, model),
-    );
-  }
-
-  Widget initWidget(BuildContext context, Widget child, MemoriesModel model) {
-    if (Status.query_events_success == model.status) {
-      Timer(Duration(seconds: 1), () => model.status = Status.event_selection_anim);
-    } else if (Status.event_selection_anim == model.status) {
+    if (Status.query_events_success == status) {
+      Timer(Duration(seconds: 1), startAnim);
+    } else if (Status.event_selection_anim == status) {
       if (!logoSizeAnim.isCompleted) {
         logoAnimCtrl.forward();
       } else {
-        model.status = Status.event_selection;
+        setState(() {
+          status = Status.event_selection;
+        });
       }
     }
 
     Widget bottomWidget;
-    switch (model.status) {
+    switch (status) {
       case Status.event_selection_anim:
         bottomWidget = Text("");
         break;
       case Status.event_selection:
-        bottomWidget = EventSelectionWidget();
+        bottomWidget = EventSelectionWidget(events: events);
         break;
       default:
-        bottomWidget = LocationStatusWidget();
+        bottomWidget = LocationStatusWidget(status: status);
     }
 
     return Scaffold(
@@ -95,10 +147,14 @@ class _StartScreenState extends State<StartScreen>
 }
 
 class LocationStatusWidget extends StatelessWidget {
+
+  LocationStatusWidget({Key key, @required this.status}): super(key: key);
+
+  final Status status;
+
   @override
   Widget build(BuildContext context) {
-    return ScopedModelDescendant<MemoriesModel>(
-      builder: (context, child, model) => Column(
+    return Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
@@ -114,14 +170,13 @@ class LocationStatusWidget extends StatelessWidget {
                 padding: EdgeInsets.only(
                     top: 20.0, bottom: 50.0, left: 20.0, right: 20.0),
                 child: Text(
-                  locationStatusText(model.status),
+                  locationStatusText(status),
                   style: TextStyle(fontSize: 24.0),
                   textAlign: TextAlign.center,
                 ),
               ),
             ],
-          ),
-    );
+          );
   }
 
   String locationStatusText(Status locationStatus) {
@@ -146,9 +201,16 @@ class LocationStatusWidget extends StatelessWidget {
 
 class EventSelectionWidget extends StatelessWidget {
 
-  Widget initWidget(BuildContext context, Widget child, MemoriesModel model) {
+  EventSelectionWidget({Key key, @required this.events}): super(key: key);
 
-    String swipeText = (model.events.length > 1) ? "(swipe for more events)" : "";
+  final List<Event> events;
+
+  String getSwipeText() {
+    return (events.length > 1) ? "(swipe for more events)" : "";
+  }
+
+  @override
+  Widget build(BuildContext context) {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -159,7 +221,7 @@ class EventSelectionWidget extends StatelessWidget {
             Text('Are you attending',
                 style: TextStyle(fontSize: 16.0),
                 textAlign: TextAlign.center),
-            Text("${model.events[0].name}?",
+            Text("${events[0].name}?",
                 style: TextStyle(fontSize: 32.0),
                 textAlign: TextAlign.center),
           ],
@@ -168,7 +230,7 @@ class EventSelectionWidget extends StatelessWidget {
           children: <Widget>[
             RaisedButton(
                 shape: StadiumBorder(),
-                onPressed: () => Navigator.push(context, Routes.cameraScreen),
+                onPressed: () => CameraScreen.startForEvent(context, events[0]),
                 child: Padding(
                   padding: EdgeInsets.only(left: 50.0, right: 50.0, top:10.0, bottom:10.0),
                   child: Text("Yep!",
@@ -178,7 +240,7 @@ class EventSelectionWidget extends StatelessWidget {
             ),
             Padding(
               padding: EdgeInsets.only(top:10.0),
-              child: Text(swipeText,
+              child: Text(getSwipeText(),
                   style: TextStyle(fontSize: 16.0),
                   textAlign: TextAlign.center),
             ),
@@ -202,11 +264,16 @@ class EventSelectionWidget extends StatelessWidget {
       ],
     );
   }
+}
 
-  @override
-  Widget build(BuildContext context) {
-    return ScopedModelDescendant<MemoriesModel>(
-      builder: (context, child, model) => initWidget(context, child, model),
-    );
-  }
+
+enum Status {
+  loading,
+  querying_location,
+  query_location_failed,
+  querying_events,
+  query_events_failed,
+  query_events_success,
+  event_selection_anim,
+  event_selection
 }
