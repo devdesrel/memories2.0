@@ -6,8 +6,10 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:memories/model.dart';
-import 'package:memories/screens/camera.dart';
+import 'package:memories/models/model.dart';
+import 'package:memories/routes.dart';
+import 'package:memories/screens/add_name.dart';
+// import 'package:memories/screens/camera.dart';
 
 class StartScreen extends StatefulWidget {
   @override
@@ -29,7 +31,6 @@ class _StartScreenState extends State<StartScreen>
         !logoAnimCtrl.isDismissed;
   }
 
-
   void refreshLocationAndEvents() async {
     print("Querying location...");
     setState(() {
@@ -37,17 +38,16 @@ class _StartScreenState extends State<StartScreen>
     });
     try {
       var location = await Location().getLocation();
-      setState((){
+      setState(() {
         currentLocation = location;
         status = Status.querying_events;
       });
 
       var client = new http.Client();
       client.get(eventsUrl).then((response) => handleEventsResponse(response));
-
-    } on PlatformException catch(e) {
+    } on PlatformException catch (e) {
       print("Error querying location: $e");
-      setState((){
+      setState(() {
         currentLocation = null;
         status = Status.query_location_failed;
       });
@@ -70,12 +70,11 @@ class _StartScreenState extends State<StartScreen>
     }
   }
 
-  void startAnim(){
+  void startAnim() {
     setState(() {
       status = Status.event_selection_anim;
     });
   }
-
 
   @override
   void initState() {
@@ -103,6 +102,11 @@ class _StartScreenState extends State<StartScreen>
         });
       }
     }
+    // void statusToAddName() {
+    //   setState(() {
+    //     status = Status.add_name;
+    //   });
+    // }
 
     Widget bottomWidget;
     switch (status) {
@@ -112,6 +116,9 @@ class _StartScreenState extends State<StartScreen>
       case Status.event_selection:
         bottomWidget = EventSelectionWidget(events: events);
         break;
+      // case Status.add_name:
+      //   bottomWidget = AddName();
+      //   break;
       default:
         bottomWidget = LocationStatusWidget(status: status);
     }
@@ -137,8 +144,8 @@ class _StartScreenState extends State<StartScreen>
               ],
             ),
           ),
-          Expanded (
-           child: bottomWidget,
+          Expanded(
+            child: bottomWidget,
           ),
         ],
       ),
@@ -147,36 +154,35 @@ class _StartScreenState extends State<StartScreen>
 }
 
 class LocationStatusWidget extends StatelessWidget {
-
-  LocationStatusWidget({Key key, @required this.status}): super(key: key);
+  LocationStatusWidget({Key key, @required this.status}) : super(key: key);
 
   final Status status;
 
   @override
   Widget build(BuildContext context) {
     return Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.only(top: 0.0),
-                child: SvgPicture.asset(
-                  'assets/location.svg',
-                  width: 80.0,
-                  height: 80.0,
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(
-                    top: 20.0, bottom: 50.0, left: 20.0, right: 20.0),
-                child: Text(
-                  locationStatusText(status),
-                  style: TextStyle(fontSize: 24.0),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ],
-          );
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Padding(
+          padding: EdgeInsets.only(top: 0.0),
+          child: SvgPicture.asset(
+            'assets/location.svg',
+            width: 80.0,
+            height: 80.0,
+          ),
+        ),
+        Padding(
+          padding:
+              EdgeInsets.only(top: 20.0, bottom: 50.0, left: 20.0, right: 20.0),
+          child: Text(
+            locationStatusText(status),
+            style: TextStyle(fontSize: 24.0),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ],
+    );
   }
 
   String locationStatusText(Status locationStatus) {
@@ -199,9 +205,22 @@ class LocationStatusWidget extends StatelessWidget {
   }
 }
 
-class EventSelectionWidget extends StatelessWidget {
+// class EventSelectionWidget extends StatefulWidget {
+//   @override
+//   _EventSelectionWidgetState createState() => _EventSelectionWidgetState();
+// }
 
-  EventSelectionWidget({Key key, @required this.events}): super(key: key);
+// class _EventSelectionWidgetState extends State<EventSelectionWidget> {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+
+//     );
+//   }
+// }
+
+class EventSelectionWidget extends StatelessWidget {
+  EventSelectionWidget({Key key, @required this.events}) : super(key: key);
 
   final List<Event> events;
 
@@ -211,35 +230,62 @@ class EventSelectionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
-        Column (
+        Column(
           children: <Widget>[
             Text('Are you attending',
-                style: TextStyle(fontSize: 16.0),
-                textAlign: TextAlign.center),
-            Text("${events[0].name}?",
-                style: TextStyle(fontSize: 32.0),
-                textAlign: TextAlign.center),
+                style: TextStyle(fontSize: 16.0), textAlign: TextAlign.center),
+            Container(
+              height: 100.0,
+              width: double.infinity,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: events.length,
+                itemBuilder: (context, i) => Container(
+                      width: MediaQuery.of(context).size.width - 10.0,
+                      color: Colors.white,
+                      margin: EdgeInsets.symmetric(
+                          vertical: 20.0, horizontal: 25.0),
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Text("${events[i].name}?",
+                            style: TextStyle(fontSize: 25.0),
+                            textAlign: TextAlign.center),
+                      ),
+                    ),
+              ),
+            ),
           ],
         ),
         Column(
           children: <Widget>[
             RaisedButton(
                 shape: StadiumBorder(),
-                onPressed: () => CameraScreen.startForEvent(context, events[0]),
+                // onPressed: () => CameraScreen.startForEvent(context, events[0]),
+
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      SlideTransitionPageRouteBuilder((BuildContext context,
+                              Animation<double> animation,
+                              Animation<double> secondaryAnimation) =>
+                          AddNamePage(
+                            event: events[0],
+                          )));
+                  // Navigator.of(context).pushNamed(booksPage);
+                },
                 child: Padding(
-                  padding: EdgeInsets.only(left: 50.0, right: 50.0, top:10.0, bottom:10.0),
+                  padding: EdgeInsets.only(
+                      left: 50.0, right: 50.0, top: 10.0, bottom: 10.0),
                   child: Text("Yep!",
-                      style: TextStyle(fontSize:28.0),
+                      style: TextStyle(fontSize: 28.0),
                       textAlign: TextAlign.center),
-                )
-            ),
+                )),
             Padding(
-              padding: EdgeInsets.only(top:10.0),
+              padding: EdgeInsets.only(top: 10.0),
               child: Text(getSwipeText(),
                   style: TextStyle(fontSize: 16.0),
                   textAlign: TextAlign.center),
@@ -250,11 +296,14 @@ class EventSelectionWidget extends StatelessWidget {
           children: <Widget>[
             IconButton(
               onPressed: () => {},
-              icon: Icon(Icons.autorenew, size: 48.0,),
+              icon: Icon(
+                Icons.autorenew,
+                size: 48.0,
+              ),
               color: Colors.black,
             ),
             Padding(
-              padding: EdgeInsets.only(top:10.0),
+              padding: EdgeInsets.only(top: 10.0),
               child: Text("Nope, please check again.",
                   style: TextStyle(fontSize: 16.0),
                   textAlign: TextAlign.center),
@@ -266,6 +315,34 @@ class EventSelectionWidget extends StatelessWidget {
   }
 }
 
+class AddName extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: SingleChildScrollView(
+        child: Column(
+          // crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Text("What\'s Your Name?"),
+            TextFormField(
+              decoration: InputDecoration(hintText: 'name'),
+            ),
+            RaisedButton(
+                shape: StadiumBorder(),
+                onPressed: () {},
+                child: Padding(
+                  padding: EdgeInsets.only(
+                      left: 50.0, right: 50.0, top: 10.0, bottom: 10.0),
+                  child: Text("That\'s me!".toUpperCase(),
+                      style: TextStyle(fontSize: 28.0),
+                      textAlign: TextAlign.center),
+                )),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 enum Status {
   loading,
@@ -275,5 +352,6 @@ enum Status {
   query_events_failed,
   query_events_success,
   event_selection_anim,
-  event_selection
+  event_selection,
+  add_name
 }

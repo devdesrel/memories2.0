@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/app" />
+            <option value="C:/flutter/.pub-cache/hosted/pub.dartlang.org/camera-0.2.4/android" />
+            <option value="C:/flutter/.pub-cache/hosted/pub.dartlang.org/image_picker-0.4.10/android" />
+            <option value="C:/flutter/.pub-cache/hosted/pub.dartlang.org/image_picker_saver-0.1.0/android" />
+            <option value="C:/flutter/.pub-cache/hosted/pub.dartlang.org/location-1.4.1/android" />
+            <option value="C:/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider-0.4.1/android" />
+            <option value="C:/flutter/.pub-cache/hosted/pub.dartlang.org/simple_permissions-0.1.9/android" />
+            <option value="C:/flutter/.pub-cache/hosted/pub.dartlang.org/video_player-0.6.5/android" />
+          </set>
+        </option>
+        <option name="resolveModulePerSourceSet" value="false" />
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>
