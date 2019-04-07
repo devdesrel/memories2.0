@@ -7,7 +7,7 @@ import 'package:memories/screens/camera.dart';
 import 'package:simple_permissions/simple_permissions.dart';
 
 class TipsPage extends StatelessWidget {
-  final Event event;
+  final Promotion event;
   TipsPage({this.event});
   @override
   Widget build(BuildContext context) {
@@ -154,7 +154,7 @@ class TipsCarouselItem extends StatelessWidget {
     );
   }
 
-  static void startForEvent(BuildContext context, Event event) async {
+  static void startForEvent(BuildContext context, Promotion event) async {
     // Fetch the available cameras before initializing the app.
     SimplePermissions.checkPermission(Permission.Camera)
         .then((permission) async {

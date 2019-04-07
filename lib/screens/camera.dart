@@ -4,8 +4,6 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 // import 'package:image_picker_saver/image_picker_saver.dart';
-import 'package:memories/blocs/camera_bloc.dart';
-import 'package:memories/blocs/camera_provider.dart';
 import 'package:memories/models/model.dart';
 import 'package:memories/routes.dart';
 import 'package:memories/screens/upload_files_page.dart';
@@ -22,7 +20,7 @@ Map<CameraLensDirection, CameraDescription> camerasMap = {};
 class CameraScreen extends StatefulWidget {
   CameraScreen({Key key, @required this.event}) : super(key: key);
 
-  final Event event;
+  final Promotion event;
 
   @override
   _CameraScreenState createState() {
@@ -48,7 +46,7 @@ class CameraScreen extends StatefulWidget {
   //     logError(e.code, e.description);
   //   }
   // }
-  static void startForEvent(BuildContext context, Event event) async {
+  static void startForEvent(BuildContext context, Promotion event) async {
     // Fetch the available cameras before initializing the app.
     SimplePermissions.checkPermission(Permission.Camera)
         .then((permission) async {
@@ -99,7 +97,7 @@ void logError(String code, String message) =>
 
 class _CameraScreenState extends State<CameraScreen>
     with TickerProviderStateMixin {
-  Event event;
+  Promotion event;
   CameraController controller;
   CameraDescription currentCamera;
   String imagePath;
@@ -174,121 +172,117 @@ class _CameraScreenState extends State<CameraScreen>
 
   @override
   Widget build(BuildContext context) {
-    var bloc = CameraBloc();
-    return CameraProvider(
-      cameraBloc: bloc,
-      child: Scaffold(
-        key: _scaffoldKey,
-        appBar: AppBar(
-          leading: IconButton(
-            icon: Icon(Icons.keyboard_arrow_left),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          actions: <Widget>[
-            _cameraDirectionIconButton(),
-            Icon(
-              Icons.flash_on,
-              size: 30.0,
-            ),
-          ],
-          title: Text(
-            event.name,
-            style: TextStyle(fontSize: 16.0),
-          ),
-          backgroundColor: Colors.black,
+    // var bloc = CameraBloc();
+    return Scaffold(
+      key: _scaffoldKey,
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.keyboard_arrow_left),
+          onPressed: () => Navigator.of(context).pop(),
         ),
-        body: Column(
-          children: <Widget>[
-            Expanded(
-              child: Container(
-                child: Stack(
-                  children: <Widget>[
-                    _cameraPreviewWidget(),
-                    Container(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          // IconButton(
-                          //   // TODO: open saved photos
-                          //   onPressed: () {
-                          //     // getApplicationDocumentsDirectory();
+        actions: <Widget>[
+          _cameraDirectionIconButton(),
+          Icon(
+            Icons.flash_on,
+            size: 30.0,
+          ),
+        ],
+        title: Text(
+          event.name ?? "no event",
+          style: TextStyle(fontSize: 16.0),
+        ),
+        backgroundColor: Colors.black,
+      ),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: Container(
+              child: Stack(
+                children: <Widget>[
+                  _cameraPreviewWidget(),
+                  Container(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        // IconButton(
+                        //   // TODO: open saved photos
+                        //   onPressed: () {
+                        //     // getApplicationDocumentsDirectory();
 
-                          //     ImagePickerSaver.pickImage(
-                          //         source: ImageSource.gallery);
+                        //     ImagePickerSaver.pickImage(
+                        //         source: ImageSource.gallery);
 
-                          //     // if(file!=null && mounted)
-                          //   },
+                        //     // if(file!=null && mounted)
+                        //   },
 
-                          //   icon: Icon(Icons.cloud_download),
-                          //   color: Colors.white,
-                          // ),
-                          IconButton(
-                            icon: Icon(Icons.photo_library),
-                            color: Colors.white,
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  SlideTransitionPageRouteBuilder(
-                                      (BuildContext context,
-                                              Animation<double> animation,
-                                              Animation<double>
-                                                  secondaryAnimation) =>
-                                          UploadFilesPage(
-                                            bloc: bloc,
-                                            event: event,
-                                            // filesList: bloc.filesList,
-                                          )));
-                            },
-                          ),
-                          Expanded(
-                            child: Text(''),
-                          ),
-                          // _cameraDirectionIconButton(),
-                          //TODO _flashIconButton(),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: const Alignment(0.0, -1.0),
-                          end: const Alignment(0.0, 0.6),
-                          colors: <Color>[
-                            const Color(0xff000000),
-                            const Color(0x00000000)
-                          ],
+                        //   icon: Icon(Icons.cloud_download),
+                        //   color: Colors.white,
+                        // ),
+                        IconButton(
+                          icon: Icon(Icons.photo_library),
+                          color: Colors.white,
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                SlideTransitionPageRouteBuilder((BuildContext
+                                            context,
+                                        Animation<double> animation,
+                                        Animation<double> secondaryAnimation) =>
+                                    UploadFilesPage(
+                                      // bloc: bloc,
+                                      event: event,
+                                      // filesList: bloc.filesList,
+                                    )));
+                          },
                         ),
+                        Expanded(
+                          child: Text(''),
+                        ),
+                        // _cameraDirectionIconButton(),
+                        //TODO _flashIconButton(),
+                      ],
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: const Alignment(0.0, -1.0),
+                        end: const Alignment(0.0, 0.6),
+                        colors: <Color>[
+                          const Color(0xff000000),
+                          const Color(0x00000000)
+                        ],
                       ),
                     ),
-                  ],
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                ),
+                  ),
+                ],
               ),
-            ),
-            Container(
-              child: Padding(
-                  padding: new EdgeInsets.all(8.0),
-                  child: Stack(
-                    children: <Widget>[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          _thumbnailWidget(bloc),
-                          _cameraVideoToggleButton(),
-                        ],
-                      ),
-                      Center(
-                        child: _cameraPrimaryActionButton(bloc),
-                      )
-                    ],
-                  )),
-              // _captureControlRowWidget(),
               decoration: BoxDecoration(
                 color: Colors.black,
               ),
             ),
-          ],
-        ),
+          ),
+          Container(
+            child: Padding(
+                padding: new EdgeInsets.all(8.0),
+                child: Stack(
+                  children: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        _thumbnailWidget(),
+                        _cameraVideoToggleButton(),
+                      ],
+                    ),
+                    Center(
+                      child: _cameraPrimaryActionButton(),
+                    )
+                  ],
+                )),
+            // _captureControlRowWidget(),
+            decoration: BoxDecoration(
+              color: Colors.black,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -405,7 +399,7 @@ class _CameraScreenState extends State<CameraScreen>
   // }
 
   /// Display the thumbnail of the captured image or video.
-  Widget _thumbnailWidget(CameraBloc bloc) {
+  Widget _thumbnailWidget() {
     return new Align(
       alignment: Alignment.centerRight,
       child: videoController == null && imagePath == null
@@ -422,7 +416,7 @@ class _CameraScreenState extends State<CameraScreen>
                                         Animation<double> animation,
                                         Animation<double> secondaryAnimation) =>
                                     UploadFilesPage(
-                                      bloc: bloc,
+                                      // bloc: bloc,
                                       event: event,
                                       // filesList: bloc.filesList,
                                     )));
@@ -445,7 +439,7 @@ class _CameraScreenState extends State<CameraScreen>
     );
   }
 
-  Widget _cameraPrimaryActionButton(CameraBloc bloc) {
+  Widget _cameraPrimaryActionButton() {
     if (videoMode) {
       if (controller != null && controller.value.isRecordingVideo) {
         return FloatingActionButton(
@@ -483,7 +477,7 @@ class _CameraScreenState extends State<CameraScreen>
             controller != null &&
                     controller.value.isInitialized &&
                     !controller.value.isRecordingVideo
-                ? onTakePictureButtonPressed(bloc)
+                ? onTakePictureButtonPressed()
                 : null;
           });
     }
@@ -542,15 +536,15 @@ class _CameraScreenState extends State<CameraScreen>
     }
   }
 
-  void onTakePictureButtonPressed(CameraBloc bloc) {
+  void onTakePictureButtonPressed() {
     takePicture().then((String filePath) {
       //TODO: save photo on phone
       // savePhoto(filePath);
       if (mounted) {
         // bloc.filesList.add((File(filePath)));
-        print(bloc.filesList);
-        bloc.addPicture.add(File(filePath));
-        print(bloc.filesList);
+        // print(bloc.filesList);
+        // bloc.addPicture.add(File(filePath));
+        // print(bloc.filesList);
 
         setState(() {
           imagePath = filePath;
@@ -582,7 +576,7 @@ class _CameraScreenState extends State<CameraScreen>
     }
 
     final Directory extDir = await getApplicationDocumentsDirectory();
-    final String dirPath = '${extDir.path}/Pictures/flutter_test';
+    final String dirPath = '${extDir.path}/Videos/flutter_test';
     var exists = Directory(dirPath).existsSync();
     if (!exists) {
       await Directory(dirPath).create(recursive: true);

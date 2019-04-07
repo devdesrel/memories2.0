@@ -5,7 +5,7 @@ import 'package:memories/routes.dart';
 import 'package:memories/screens/tips_page.dart';
 
 class AddNamePage extends StatelessWidget {
-  final Event event;
+  final Promotion event;
   AddNamePage({this.event});
   @override
   Widget build(BuildContext context) {

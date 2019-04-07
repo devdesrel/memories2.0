@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:memories/screens/start.dart';
+import 'package:memories/screens/test.dart';
 
 class MemoriesApp extends StatelessWidget {
   @override
@@ -9,7 +10,7 @@ class MemoriesApp extends StatelessWidget {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    return MaterialApp(title: 'Memories Brand', home: StartScreen());
+    return MaterialApp(title: 'Memories Brand', home: TestPage());
   }
 }
 
