@@ -17,6 +17,7 @@ dependency_overrides:
   rxdart: "^0.18.0"
   mime: ^0.9.6
   chewie: ^0.8.0
+  dio: ^2.1.0
 
   # image_downloader: ^0.9.1
   # The following adds the Cupertino Icons font to your application.

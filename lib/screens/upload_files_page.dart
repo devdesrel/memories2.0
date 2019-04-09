@@ -446,37 +446,35 @@ class UploadPage extends StatelessWidget {
                   crossAxisCount: 3,
                   crossAxisSpacing: 3.0,
                   mainAxisSpacing: 3.0),
-              itemBuilder: (context, i) => Card(
-                    margin: EdgeInsets.all(5.0),
-                    child: Column(
-                      children: <Widget>[
-                        Stack(
-                          fit: StackFit.expand,
-                          alignment: Alignment.topLeft,
-                          children: <Widget>[
-                            CustomListItem(
-                              data: snapshot.data[i],
-                            ),
-                            getFileType(snapshot.data[i])
-                                ? Positioned(
-                                    child: Icon(
-                                      Icons.play_arrow,
-                                      size: 35.0,
-                                      color: Colors.white,
-                                    ),
-                                    top: 3.0,
-                                    left: 3.0,
-                                  )
-                                : Container(),
-                          ],
-                        ),
-                        LinearProgressIndicator(
-                            value: 4,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.greenAccent))
-                      ],
-                    ),
+              itemBuilder: (context, i) =>
+                  // Column(
+                  //   children: <Widget>[
+                  Stack(
+                    fit: StackFit.expand,
+                    alignment: Alignment.topLeft,
+                    children: <Widget>[
+                      CustomListItem(
+                        data: snapshot.data[i],
+                      ),
+                      getFileType(snapshot.data[i])
+                          ? Positioned(
+                              child: Icon(
+                                Icons.play_arrow,
+                                size: 35.0,
+                                color: Colors.white,
+                              ),
+                              top: 3.0,
+                              left: 3.0,
+                            )
+                          : Container(),
+                    ],
                   ),
+              // LinearProgressIndicator(
+              //     value: 4,
+              //     valueColor: AlwaysStoppedAnimation<Color>(
+              //         Colors.greenAccent))
+              //   ],
+              // ),
             )
           : Center(
               child: Container(

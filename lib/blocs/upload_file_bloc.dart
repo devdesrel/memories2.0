@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:async/async.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:memories/constants.dart';
@@ -169,25 +170,148 @@ class FileUploadBloc {
     if (filesCount != 0) {
       print(selectedFilesList[0].length());
       // for (var i = 0; i < filesCount; i++) {
-      upload(selectedFilesList[0]).then((isUploaded) {
+      uploadD(selectedFilesList[0]).then((isUploaded) {
         print(isUploaded);
       });
       // }
     }
   }
 
+  void showDownloadProgress(received, total) {
+    if (total != -1) {
+      print((received / total * 100).toStringAsFixed(0) + "%");
+    }
+  }
+
+  Future<bool> uploadD(File file) async {
+    bool isSuccessfull;
+    var dio = Dio();
+    dio.options.baseUrl = "$uploadApi";
+    dio.interceptors.add(LogInterceptor(requestBody: true));
+    FormData formData = FormData.from({
+      "iframeKey": "8c1a237b2b84212be113d71e194bd393",
+      "apikey": "t0psycr3t3",
+      "secret": "secret",
+      "fields": [
+        {"key": "first_name", "value": "videoupload"},
+        {"key": "larst_name", "value": "videoupload"},
+        {"key": "test", "value": "videoupload"},
+        {"key": "checkboxtest", "value": "true"},
+        {"key": "email_address", "value": "something@gmail.com"}
+      ],
+      "file": UploadFileInfo(file, basename(file.path)),
+    });
+
+    Response response;
+    response = await dio.post("/upload",
+        data: formData,
+        onSendProgress: showDownloadProgress,
+        // cancelToken: CancelToken(),
+        options: new Options(
+            contentType:
+                ContentType.parse("application/x-www-form-urlencoded")));
+    print(response);
+    if (response.statusCode == 200) {
+      isSuccessfull = true;
+      // var parsed = json.decode(response.body);
+
+      // String message = json.encode(response.data["msg"]);
+      // print("message: " + message);
+    } else {
+      isSuccessfull = false;
+    }
+    return isSuccessfull;
+  }
+
+  Future<bool> uploadDio(File file) async {
+    var dio = Dio();
+    bool isSuccessfull;
+
+    Map<String, dynamic> body = {
+      "iframeKey": "8c1a237b2b84212be113d71e194bd393",
+      "apikey": "t0psycr3t3",
+      "secret": "secret",
+      "fields": [
+        {"key": "first_name", "value": "videoupload"},
+        {"key": "larst_name", "value": "videoupload"},
+        {"key": "test", "value": "videoupload"},
+        {"key": "checkboxtest", "value": "true"},
+        {"key": "email_address", "value": "something@gmail.com"}
+      ],
+      "file": new UploadFileInfo(file, basename(file.path)),
+    };
+
+    try {
+      // var response = await dio.post('$uploadApi',
+      //     data: body,
+      //     options: new Options(
+      //         contentType:
+      //             ContentType.parse("application/x-www-form-urlencoded")));
+
+      // if (response.statusCode == 200) {
+      //   isSuccessfull = true;
+      // }
+      // print(response);
+      FormData formData = new FormData.from({
+        "iframeKey": "8c1a237b2b84212be113d71e194bd393",
+        "apikey": "t0psycr3t3",
+        "secret": "secret",
+        "fields": [
+          {"key": "first_name", "value": "videoupload"},
+          {"key": "larst_name", "value": "videoupload"},
+          {"key": "test", "value": "videoupload"},
+          {"key": "checkboxtest", "value": "true"},
+          {"key": "email_address", "value": "something@gmail.com"}
+        ],
+        "file": new UploadFileInfo(file, basename(file.path)),
+      });
+      await dio.post("$uploadApi", data: formData);
+      // print(response);
+      // if (response.statusCode == 200) isSuccessfull = true;
+    } catch (e) {
+      print(e);
+      isSuccessfull = false;
+    }
+    return isSuccessfull;
+  }
+
   Future<bool> upload(File file) async {
     bool isSuccessfull;
+// {
+//   "iframeKey": "8c1a237b2b84212be113d71e194bd393",
+//   "apikey": "t0psycr3t3",
+//   "secret": "secret",
+//   "fields": [
+//     {
+//       "key": "first_name",
+//       "value": "videoupload"
+//     }, {
+//       "key": "larst_name",
+//       "value": "videoupload"
+//     }, {
+//       "key": "test",
+//       "value": "videoupload"
+//     }, {
+//       "key": "checkboxtest",
+//       "value": "true"
+//     }, {
+//       "key": "email_address",
+//       "value": "anvar.akramov@gmail.com"
+//     }
+//   ]
+// }
 
     try {
       Map<String, String> fields = {
         "apikey": "t0psycr3t3",
-        "iframeKey": "2cda98e067ead6c88f4b560dcc2531bd",
+        // "iframeKey": "2cda98e067ead6c88f4b560dcc2531bd",
+        "iframeKey": "8c1a237b2b84212be113d71e194bd393",
         "first_name": "Durdona",
         "last_name": "Bakhronova",
-        "email_address": "anvar.akramov@gmail.com",
+        "email_address": "test@gmail.com",
         "checkboxtest": "true",
-        "promotion_items": "aaaaaaaaaaa"
+        "promotion_items": "aaaaaaaaaaa",
+        "secret": "secret"
       };
       // open a bytestream
       var stream = new http.ByteStream(DelegatingStream.typed(file.openRead()));
