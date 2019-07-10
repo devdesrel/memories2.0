@@ -121,6 +121,7 @@ class TipsCarouselItem extends StatelessWidget {
             ),
             RaisedButton(
                 shape: StadiumBorder(),
+                color: Theme.of(context).accentColor,
                 // onPressed: () async {
                 //   // Navigator.push(
                 //   //     context,
@@ -145,7 +146,9 @@ class TipsCarouselItem extends StatelessWidget {
                   padding: EdgeInsets.only(
                       left: 50.0, right: 50.0, top: 10.0, bottom: 10.0),
                   child: Text("I\'m ready".toUpperCase(),
-                      style: TextStyle(fontSize: 28.0),
+                      style: TextStyle(
+                          fontSize: 28.0,
+                          color: Theme.of(context).textSelectionColor),
                       textAlign: TextAlign.center),
                 )),
           ],

@@ -3,9 +3,10 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-// import 'package:image_picker_saver/image_picker_saver.dart';
+import 'package:image_picker_saver/image_picker_saver.dart';
 import 'package:memories/models/model.dart';
 import 'package:memories/routes.dart';
+import 'package:memories/screens/photo_view.dart';
 import 'package:memories/screens/upload_files_page.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:simple_permissions/simple_permissions.dart';
@@ -228,6 +229,8 @@ class _CameraScreenState extends State<CameraScreen>
                                             context,
                                         Animation<double> animation,
                                         Animation<double> secondaryAnimation) =>
+                                    //TODO:
+                                    // GalleryExample()
                                     UploadFilesPage(
                                       // bloc: bloc,
                                       event: event,
@@ -661,7 +664,7 @@ class _CameraScreenState extends State<CameraScreen>
     try {
       await controller.takePicture(filePath);
       // var image = ImagePickerSaver.pickImage(source: ImageSource.camera);
-      // ImagePickerSaver.saveFile(fileData: image.);
+      // ImagePickerSaver.saveFile(fileData:(Uri.file(filePath).) );
 
       // var path = await getApplicationDocumentsDirectory();
       // print(path);

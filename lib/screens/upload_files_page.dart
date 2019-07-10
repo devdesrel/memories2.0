@@ -5,9 +5,11 @@ import 'package:memories/blocs/upload_file_bloc.dart';
 import 'package:memories/blocs/upload_file_provider.dart';
 import 'package:memories/constants.dart';
 import 'package:memories/models/model.dart';
+import 'package:memories/models/upload_file_details_model.dart';
 import 'package:path/path.dart';
 import 'package:mime/mime.dart';
 import 'package:chewie/chewie.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 import 'package:video_player/video_player.dart';
 
 class UploadFilesPage extends StatelessWidget {
@@ -48,30 +50,29 @@ class UploadFilesPage extends StatelessWidget {
         accessType: UploadPageNavigation.All,
       ),
       UploadPage(bloc: bloc),
-      HomePage(
-        bloc: bloc,
-        accessType: UploadPageNavigation.Photos,
-      ),
-      HomePage(
-        bloc: bloc,
-        accessType: UploadPageNavigation.Videos,
-      ),
+      // HomePage(
+      //   bloc: bloc,
+      //   accessType: UploadPageNavigation.Photos,
+      // ),
+      // HomePage(
+      //   bloc: bloc,
+      //   accessType: UploadPageNavigation.Videos,
+      // ),
+      Center(child: Text("Will open Gallery later"))
     ];
     return FileUploadProvider(
       fileUploadBloc: bloc,
       child: Scaffold(
           appBar: AppBar(
-            backgroundColor: Colors.grey[300],
+            backgroundColor: Theme.of(context).primaryColor,
             title: Text(
               // widget.event.name,
               event.name ?? "No event",
-              style: TextStyle(color: Colors.black),
+              style: TextStyle(color: Theme.of(context).textSelectionColor),
             ),
             leading: IconButton(
-              icon: Icon(
-                Icons.chevron_left,
-                color: Colors.black,
-              ),
+              icon: Icon(Icons.chevron_left,
+                  color: Theme.of(context).textSelectionColor),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -86,7 +87,7 @@ class UploadFilesPage extends StatelessWidget {
                         ? IconButton(
                             icon: Icon(
                               Icons.border_horizontal,
-                              color: Colors.black,
+                              color: Theme.of(context).textSelectionColor,
                             ),
                             onPressed: () {
                               // widget.bloc.setGridView.add(false);
@@ -96,7 +97,7 @@ class UploadFilesPage extends StatelessWidget {
                         : IconButton(
                             icon: Icon(
                               Icons.grid_on,
-                              color: Colors.black,
+                              color: Theme.of(context).textSelectionColor,
                             ),
                             onPressed: () {
                               // widget.bloc.setGridView.add(true);
@@ -106,7 +107,7 @@ class UploadFilesPage extends StatelessWidget {
                     : IconButton(
                         icon: Icon(
                           Icons.grid_on,
-                          color: Colors.black,
+                          color: Theme.of(context).textSelectionColor,
                         ),
                         onPressed: () {
                           // widget.bloc.setGridView.add(true);
@@ -117,7 +118,7 @@ class UploadFilesPage extends StatelessWidget {
               IconButton(
                 icon: Icon(
                   Icons.check,
-                  color: Colors.black,
+                  color: Theme.of(context).textSelectionColor,
                 ),
                 onPressed: () {
                   bloc.mainUploadFunction();
@@ -140,50 +141,33 @@ class UploadFilesPage extends StatelessWidget {
           ),
           bottomNavigationBar: BottomNavigationBar(
             onTap: (int index) {
-              bloc.getBottomVanigationValue.add(index);
+              bloc.getBottomVanigationIndex.add(index);
             },
+            currentIndex: bloc.navigationIndex,
             items: [
               BottomNavigationBarItem(
-                  title: Container(
-                    height: 0.0,
-                  ),
-                  // Text(
-                  //   // "Home".toUpperCase(),
-                  //   "",
-                  //   style: TextStyle(color: Colors.black),
-                  // ),
-                  icon: Icon(Icons.home, color: Colors.black, size: 35.0)),
+                  title: Text("My Files"),
+                  icon: Icon(Icons.home,
+                      color: Theme.of(context).accentColor, size: 35.0)),
               BottomNavigationBarItem(
-                  title: Text(
-                      // "Upload".toUpperCase(),
-                      "",
+                  title: Text("Event files",
                       style: TextStyle(color: Colors.black)),
                   icon: Icon(Icons.cloud_upload,
-                      color: Colors.black, size: 35.0)),
+                      color: Theme.of(context).accentColor, size: 35.0)),
               BottomNavigationBarItem(
-                  title: Text(
-                      // "Photos".toUpperCase(),
-                      "",
-                      style: TextStyle(color: Colors.black)),
-                  icon:
-                      Icon(Icons.camera_alt, color: Colors.black, size: 35.0)),
-              BottomNavigationBarItem(
-                  title: Text(
-                      // "Videos".toUpperCase(),
-                      "",
-                      style: TextStyle(color: Colors.black)),
-                  icon: Icon(Icons.videocam, color: Colors.black, size: 35.0)),
-              BottomNavigationBarItem(
-                  title: Text(
-                      // "Settings".toUpperCase(),
-                      "",
-                      style: TextStyle(color: Colors.black)),
-                  icon: Icon(Icons.settings, color: Colors.black, size: 35.0)),
+                  title: Text("Gallery", style: TextStyle(color: Colors.black)),
+                  icon: Icon(Icons.photo,
+                      color: Theme.of(context).accentColor, size: 35.0)),
+              // BottomNavigationBarItem(
+              //     title:
+              //         Text("Settings", style: TextStyle(color: Colors.black)),
+              //     icon: Icon(Icons.settings,
+              //         color: Theme.of(context).accentColor, size: 35.0)),
             ],
           ),
           // body: HomePage(bloc: bloc)),
           body: StreamBuilder<int>(
-              stream: bloc.bottomNavigationSelectedValue,
+              stream: bloc.navigationbarIndex,
               initialData: 0,
               builder: (context, snapshot) {
                 return pages[snapshot.data];
@@ -287,11 +271,7 @@ class HomePage extends StatelessWidget {
                                                     bottom: 3.0,
                                                     right: 3.0,
                                                     child: data.data.contains(i)
-                                                        ?
-                                                        // Icon(
-                                                        // color: Colors.white,
-                                                        // size: 28.0,
-                                                        IconButton(
+                                                        ? IconButton(
                                                             onPressed: () {
                                                               bloc.removePhotoIndexFromSelected
                                                                   .add(i);
@@ -314,14 +294,7 @@ class HomePage extends StatelessWidget {
                                                               color:
                                                                   Colors.white,
                                                               size: 28.0,
-                                                            ))
-
-                                                    // onPressed: () {
-                                                    //   bloc.addPhotoIndexToSelected
-                                                    //       .add(i);
-                                                    // },
-
-                                                    ),
+                                                            ))),
                                                 getFileType(snapshot.data[i])
                                                     ? Positioned(
                                                         child: Icon(
@@ -467,6 +440,26 @@ class UploadPage extends StatelessWidget {
                               left: 3.0,
                             )
                           : Container(),
+                      StreamBuilder<UploadFileDetailes>(
+                          stream: bloc.downloadDetails,
+                          builder: (context, shot) {
+                            if (shot.hasData) {
+                              return Positioned(
+                                bottom: 0.0,
+                                child: new LinearPercentIndicator(
+                                  width: MediaQuery.of(context).size.width / 3,
+                                  lineHeight: 14.0,
+                                  percent: shot.data.index == i
+                                      ? shot.data.downloadPercent
+                                      : 0.0,
+                                  backgroundColor: Colors.grey,
+                                  progressColor: Colors.blue,
+                                ),
+                              );
+                            } else {
+                              return Container();
+                            }
+                          }),
                     ],
                   ),
               // LinearProgressIndicator(

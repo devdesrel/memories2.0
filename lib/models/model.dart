@@ -31,12 +31,12 @@ class Event {
 }
 
 class Promotion {
-  final int campaignid;
   final String iframeKey;
+  final String name;
+  final int campaignid;
   final double latitude;
   final double longtitude;
-  final double radius;
-  final String name;
+  final int radius;
 
   Promotion(
       {this.campaignid,
@@ -47,11 +47,23 @@ class Promotion {
       this.name});
   factory Promotion.fromJson(Map<String, dynamic> json) {
     return Promotion(
-        campaignid: json['campaignid'],
-        iframeKey: json['iframeKey'],
-        latitude: json['location_latitude'],
-        longtitude: json['location_longitude'],
-        radius: json['location_radius'],
-        name: json['name']);
+      iframeKey: json['iframeKey'],
+      name: json['name'],
+      campaignid: json['campaignid'],
+      latitude: json['location_latitude'],
+      longtitude: json['location_longitude'],
+      radius: json['location_radius'],
+    );
   }
 }
+
+// {"success":true,
+// "msg":"success","
+// error":null,
+// "promotions":[{
+//   "iframeKey":"7075a9c1526ca649a137dd9cd2483126",
+//   "name":"Mobile_Video_Test",
+//   "campaignid":40,
+//   "location_latitude":41.32750,
+//   "location_longitude":69.34806,
+//   "location_radius":20000}]}

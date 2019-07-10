@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+// import 'package:flutter_svg/svg.dart';
 import 'package:memories/models/model.dart';
 import 'package:memories/routes.dart';
 import 'package:memories/screens/tips_page.dart';
@@ -28,7 +29,8 @@ class AddNamePage extends StatelessWidget {
                     height: 120.0,
                   ),
                   Text('Memories Brand',
-                      style: TextStyle(fontSize: 32.0),
+                      style: TextStyle(
+                          fontSize: 32.0, color: Theme.of(context).accentColor),
                       textAlign: TextAlign.center),
                 ],
               ),
@@ -54,6 +56,7 @@ class AddNamePage extends StatelessWidget {
                   children: <Widget>[
                     RaisedButton(
                         shape: StadiumBorder(),
+                        color: Theme.of(context).accentColor,
                         onPressed: () {
                           Navigator.push(
                               context,
@@ -70,7 +73,9 @@ class AddNamePage extends StatelessWidget {
                           padding: EdgeInsets.only(
                               left: 50.0, right: 50.0, top: 10.0, bottom: 10.0),
                           child: Text("That\'s me!".toUpperCase(),
-                              style: TextStyle(fontSize: 28.0),
+                              style: TextStyle(
+                                  fontSize: 28.0,
+                                  color: Theme.of(context).textSelectionColor),
                               textAlign: TextAlign.center),
                         )),
                     // Padding(

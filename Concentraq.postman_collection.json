@@ -1,0 +1,168 @@
+{
+	"id": "46af0dc0-1014-33ab-ed6d-fe10d99510f7",
+	"name": "IPC Collection",
+	"description": "",
+	"order": [
+		"9898656b-2a43-425b-baf3-0b281d493a4d",
+		"403c5abf-75d1-33b2-d20c-4305ab8a6d80",
+		"60f6292b-f2e9-260d-a4eb-1684c5ebb558",
+		"88a270cf-5fcc-120e-3e3a-93fb64a9765b"
+	],
+	"folders": [],
+	"folders_order": [],
+	"timestamp": 1552386242854,
+	"owner": 0,
+	"public": false,
+	"requests": [
+		{
+			"id": "403c5abf-75d1-33b2-d20c-4305ab8a6d80",
+			"headers": "",
+			"headerData": [],
+			"url": "https://staging.concentraq.com/api/order/submit",
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "POST",
+			"data": [
+				{
+					"key": "body",
+					"value": "{\n  \"iframeKey\": \"8c1a237b2b84212be113d71e194bd393\",\n  \"apikey\": \"t0psycr3t3\",\n  \"secret\": \"secret\",\n  \"fields\": [\n    {\n      \"key\": \"first_name\",\n      \"value\": \"videoupload\"\n    }, {\n      \"key\": \"larst_name\",\n      \"value\": \"videoupload\"\n    }, {\n      \"key\": \"test\",\n      \"value\": \"videoupload\"\n    }, {\n      \"key\": \"checkboxtest\",\n      \"value\": \"true\"\n    }, {\n      \"key\": \"email_address\",\n      \"value\": \"anvar.akramov@gmail.com\"\n    }\n  ]\n}",
+					"description": "",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "photo_upload",
+					"value": "photo_2018-05-23_16-47-16.jpg",
+					"description": "",
+					"type": "file",
+					"enabled": true
+				}
+			],
+			"dataMode": "params",
+			"version": 2,
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1554736134926,
+			"name": "IPD Submit response Staging",
+			"description": "IPasdf",
+			"collectionId": "46af0dc0-1014-33ab-ed6d-fe10d99510f7",
+			"responses": []
+		},
+		{
+			"id": "60f6292b-f2e9-260d-a4eb-1684c5ebb558",
+			"headers": "",
+			"headerData": [],
+			"url": "http://localhost:8080/photo/2cda98e067ead6c88f4b560dcc2531bd?image_type=UPLOADED_VIDEO",
+			"queryParams": [
+				{
+					"key": "image_type",
+					"value": "UPLOADED_VIDEO",
+					"equals": true,
+					"description": "",
+					"enabled": true
+				}
+			],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "GET",
+			"data": [],
+			"dataMode": "params",
+			"version": 2,
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1554573345236,
+			"name": "IPD Request Get Photo",
+			"description": "IPasdf",
+			"collectionId": "46af0dc0-1014-33ab-ed6d-fe10d99510f7",
+			"responses": []
+		},
+		{
+			"id": "88a270cf-5fcc-120e-3e3a-93fb64a9765b",
+			"headers": "",
+			"headerData": [],
+			"url": "http://localhost:8080/api/order/submit",
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "POST",
+			"data": [
+				{
+					"key": "body",
+					"value": "{\n\"iframeKey\": \"iframeKey\",\n  \"apikey\": \"apikey\",\n  \"fields\": [\n    {\n      \"key\": \"key\",\n      \"value\": \"value\"\n    }\n  ]\n}",
+					"description": "",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "file",
+					"value": "",
+					"description": "",
+					"type": "file",
+					"enabled": true
+				}
+			],
+			"dataMode": "params",
+			"version": 2,
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1551390760668,
+			"name": "CORS check",
+			"description": "IPasdf",
+			"collectionId": "46af0dc0-1014-33ab-ed6d-fe10d99510f7",
+			"responses": [],
+			"isFromCollection": true,
+			"collectionRequestId": "9898656b-2a43-425b-baf3-0b281d493a4d"
+		},
+		{
+			"id": "9898656b-2a43-425b-baf3-0b281d493a4d",
+			"headers": "",
+			"headerData": [],
+			"url": "http://localhost:8080/api/order/submit",
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "POST",
+			"data": [
+				{
+					"key": "body",
+					"value": "{\n  \"iframeKey\": \"2cda98e067ead6c88f4b560dcc2531bd\",\n  \"apikey\": \"t0psycr3t3\",\n  \"secret\": \"secret\",\n  \"fields\": [\n    {\n      \"key\": \"first_name\",\n      \"value\": \"videoupload\"\n    }, {\n      \"key\": \"larst_name\",\n      \"value\": \"videoupload\"\n    }, {\n      \"key\": \"test\",\n      \"value\": \"videoupload\"\n    }, {\n      \"key\": \"checkboxtest\",\n      \"value\": \"true\"\n    }, {\n      \"key\": \"email_address\",\n      \"value\": \"anvar.akramov@gmail.com\"\n    }\n  ]\n}",
+					"description": "",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "file",
+					"value": "",
+					"description": "",
+					"type": "file",
+					"enabled": true
+				},
+				{
+					"key": "videotest",
+					"value": "video_2019-04-02_16-26-19.mp4",
+					"description": "",
+					"type": "file",
+					"enabled": true
+				}
+			],
+			"dataMode": "params",
+			"version": 2,
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1554573350198,
+			"name": "IPD Request Test",
+			"description": "IPasdf",
+			"collectionId": "46af0dc0-1014-33ab-ed6d-fe10d99510f7",
+			"responses": []
+		}
+	]
+}

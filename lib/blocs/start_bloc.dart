@@ -11,6 +11,7 @@ class StartBloc {
   Future<Map<String, double>> getLocation() async {
     Map<String, double> _currentLocation;
     try {
+      //TODO: use geolocator plugin and check if geolocation is on
       var location = new Location();
       await location.getLocation().then((location) {
         print(location);
@@ -24,13 +25,14 @@ class StartBloc {
       });
     } catch (e) {
       //TODO: use flushbar
+      print(e);
       print('ahh fuck');
     }
     return _currentLocation;
   }
 
   Future<List<Promotion>> eventsApiRequest() async {
-    List<Promotion> _promotionList;
+    List<Promotion> _promotionList = [];
     var _location = await getLocation();
     if (_location != null) {
       try {
@@ -69,11 +71,6 @@ class StartBloc {
         longtitude: 34.0034,
         radius: 34,
         name: "Test promotion 2");
-
-    _promotionList == null
-        ? _promotionList = []
-        : _promotionList = _promotionList;
-
     _promotionList.add(testValue);
     _promotionList.add(testValue2);
 
@@ -87,14 +84,26 @@ class StartBloc {
 
   Stream<bool> get retryButton => _retryButtonSubject.stream;
 
-  final _retryButtonSubject = BehaviorSubject<bool>();
+  Stream<bool> get startAnimationStatus => _startAnimationStatusSubject.stream;
+
+  final _startAnimationStatusSubject = BehaviorSubject<bool>(seedValue: true);
+
+  Stream<bool> get isGettingEventsFinished =>
+      _isGettingEventsFinishedSubject.stream;
+
+  final _isGettingEventsFinishedSubject = BehaviorSubject<bool>();
+
+  final _retryButtonSubject = BehaviorSubject<bool>(seedValue: false);
 
   Sink<bool> get isRetryPressed => _isRetryPressedController.sink;
 
   final _isRetryPressedController = StreamController<bool>();
+
   void getPromotions() {
     eventsApiRequest().then((promotions) {
       _listOfPromotionsSubject.add(promotions);
+
+      _isGettingEventsFinishedSubject.add(true);
     });
   }
 
@@ -111,5 +120,6 @@ class StartBloc {
   dispose() {
     _listOfPromotionsSubject.close();
     _isRetryPressedController.close();
+    _startAnimationStatusSubject.close();
   }
 }

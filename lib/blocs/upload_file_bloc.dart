@@ -2,14 +2,15 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:async/async.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 import 'package:memories/constants.dart';
+import 'package:memories/models/files_from_server.dart';
+import 'package:memories/models/upload_file_details_model.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:http/http.dart' as http;
 
 class FileUploadBloc {
   // List<File> filesList = [];
@@ -31,6 +32,11 @@ class FileUploadBloc {
   List<String> _filesList = List();
 
   List<String> _filteredPathsList = List();
+  int navigationIndex = 0;
+  int currentFileIndex = 0;
+
+  List<String> eventPhotosFromServerList = [];
+  List<String> eventViedeosFromServerList = [];
 
   Future<Directory> getDirectory() async {
     var directory = await getApplicationDocumentsDirectory();
@@ -90,6 +96,34 @@ class FileUploadBloc {
     }
 
     return null;
+  }
+
+  Future<List<String>> getEventPhotosFromServerList() async {
+    //7075a9c1526ca649a137dd9cd2483126 => for video upload
+    var iframeKey = "8c1a237b2b84212be113d71e194bd393";
+    var secret = "secret";
+    var secretValue = "secret";
+    var imageTypeValue = "UPLOADED_IMAGE";
+    // var queryParameters = {
+    //   '$secret': '$secretValue',
+    //   'image_type': '$imageTypeValue',
+    // };
+    // var uri = Uri.https(apiGetFiles, '/$iframeKey', queryParameters);
+
+    List<String> urls = [];
+    try {
+      var response = await http.get(
+          "$apiGetFiles/$iframeKey?secret=$secretValue&image_type=$imageTypeValue");
+      // var response = await http.get(uri);
+      if (response.statusCode == 200) {
+        var jsonBody = json.decode(response.body);
+        List<Photos> result = EventFilesModel.fromJson(jsonBody).photos;
+        if (result.length > 0) result.forEach((r) => urls.add(r.url));
+      }
+    } catch (e) {
+      print(e);
+    }
+    return urls;
   }
 
   addPhotosListToStream() async {
@@ -166,188 +200,247 @@ class FileUploadBloc {
 //   ]
 // }
   mainUploadFunction() {
-    int filesCount = selectedFilesList.length;
-    if (filesCount != 0) {
-      print(selectedFilesList[0].length());
-      // for (var i = 0; i < filesCount; i++) {
-      uploadD(selectedFilesList[0]).then((isUploaded) {
-        print(isUploaded);
-      });
-      // }
+    if (selectedFilesList.length > 0) {
+      _selectedFilesAsStringSubject.add(selectedFilesAsStringList);
+      _navigationbarIndexSubject.add(1);
+      navigationIndex = 1;
+      int filesCount = selectedFilesList.length;
+      if (filesCount != 0) {
+        // print(selectedFilesList[0].length());
+        for (var i = 0; i < filesCount; i++) {
+          currentFileIndex = i;
+          uploadD(selectedFilesList[i], i).then((isUploaded) {
+            print(isUploaded);
+
+            selectedImagesIndexList.clear();
+            _selectedPhotosListSubject.add(selectedImagesIndexList);
+          });
+        }
+      }
     }
   }
+
+  // test() async {
+  //   var dio = Dio();
+  //   "https://raw.githubusercontent.com/devdesrel/memories/master/event.json";
+  //   Response response = await dio.get(
+  //       "https://raw.githubusercontent.com/devdesrel/memories/master/event.json");
+  //   print(response.data);
+  //   return true;
+  // }
 
   void showDownloadProgress(received, total) {
     if (total != -1) {
       print((received / total * 100).toStringAsFixed(0) + "%");
+      double percent = received / total;
+      UploadFileDetailes details =
+          UploadFileDetailes(index: currentFileIndex, downloadPercent: percent);
+      _downloadDetailsSubject.add(details);
     }
   }
 
-  Future<bool> uploadD(File file) async {
-    bool isSuccessfull;
+  Future<bool> uploadD(File file, index) async {
+    bool isSuccessfull = false;
     var dio = Dio();
-    dio.options.baseUrl = "$uploadApi";
-    dio.interceptors.add(LogInterceptor(requestBody: true));
-    FormData formData = FormData.from({
-      "iframeKey": "8c1a237b2b84212be113d71e194bd393",
-      "apikey": "t0psycr3t3",
-      "secret": "secret",
-      "fields": [
-        {"key": "first_name", "value": "videoupload"},
-        {"key": "larst_name", "value": "videoupload"},
-        {"key": "test", "value": "videoupload"},
-        {"key": "checkboxtest", "value": "true"},
-        {"key": "email_address", "value": "something@gmail.com"}
-      ],
-      "file": UploadFileInfo(file, basename(file.path)),
-    });
-
-    Response response;
-    response = await dio.post("/upload",
-        data: formData,
-        onSendProgress: showDownloadProgress,
-        // cancelToken: CancelToken(),
-        options: new Options(
-            contentType:
-                ContentType.parse("application/x-www-form-urlencoded")));
-    print(response);
-    if (response.statusCode == 200) {
-      isSuccessfull = true;
-      // var parsed = json.decode(response.body);
-
-      // String message = json.encode(response.data["msg"]);
-      // print("message: " + message);
-    } else {
-      isSuccessfull = false;
-    }
-    return isSuccessfull;
-  }
-
-  Future<bool> uploadDio(File file) async {
-    var dio = Dio();
-    bool isSuccessfull;
-
-    Map<String, dynamic> body = {
-      "iframeKey": "8c1a237b2b84212be113d71e194bd393",
-      "apikey": "t0psycr3t3",
-      "secret": "secret",
-      "fields": [
-        {"key": "first_name", "value": "videoupload"},
-        {"key": "larst_name", "value": "videoupload"},
-        {"key": "test", "value": "videoupload"},
-        {"key": "checkboxtest", "value": "true"},
-        {"key": "email_address", "value": "something@gmail.com"}
-      ],
-      "file": new UploadFileInfo(file, basename(file.path)),
-    };
+    dio.options.baseUrl = "$baseUrl";
+    dio.interceptors.add(LogInterceptor(
+        requestBody: true,
+        request: true,
+        requestHeader: true,
+        responseBody: true,
+        responseHeader: true));
+    String message = "{\n" +
+        "          \"iframeKey\": \"8c1a237b2b84212be113d71e194bd393\",\n" +
+        "          \"apikey\": \"t0psycr3t3\",\n" +
+        "          \"secret\": \"secret\",\n" +
+        "          \"fields\": [\n" +
+        "            {\"key\": \"first_name\", \"value\": \"videoupload\"},\n" +
+        "            {\"key\": \"larst_name\", \"value\": \"videoupload\"},\n" +
+        "            {\"key\": \"test\", \"value\": \"videoupload\"},\n" +
+        "            {\"key\": \"checkboxtest\", \"value\": \"true\"},\n" +
+        "            {\"key\": \"email_address\", \"value\": \"anvar.akramov@gmail.com\"}\n" +
+        "          ]\n" +
+        "        }";
 
     try {
-      // var response = await dio.post('$uploadApi',
-      //     data: body,
-      //     options: new Options(
-      //         contentType:
-      //             ContentType.parse("application/x-www-form-urlencoded")));
-
-      // if (response.statusCode == 200) {
-      //   isSuccessfull = true;
-      // }
-      // print(response);
-      FormData formData = new FormData.from({
-        "iframeKey": "8c1a237b2b84212be113d71e194bd393",
-        "apikey": "t0psycr3t3",
-        "secret": "secret",
-        "fields": [
-          {"key": "first_name", "value": "videoupload"},
-          {"key": "larst_name", "value": "videoupload"},
-          {"key": "test", "value": "videoupload"},
-          {"key": "checkboxtest", "value": "true"},
-          {"key": "email_address", "value": "something@gmail.com"}
+      FormData formData = FormData.from({
+        "body": message,
+        // {
+        //   "iframeKey": "8c1a237b2b84212be113d71e194bd393",
+        //   "apikey": "t0psycr3t3",
+        //   "secret": "secret",
+        //   "fields": [
+        //     {"key": "first_name", "value": "videoupload"},
+        //     {"key": "larst_name", "value": "videoupload"},
+        //     {"key": "test", "value": "videoupload"},
+        //     {"key": "checkboxtest", "value": "true"},
+        //     {"key": "email_address", "value": "anvar.akramov@gmail.com"}
+        //   ]
+        // },
+        "photo_upload": [
+          new UploadFileInfo(new File(file.path), basename(file.path)),
+          new UploadFileInfo(new File(file.path), basename(file.path)),
         ],
-        "file": new UploadFileInfo(file, basename(file.path)),
       });
-      await dio.post("$uploadApi", data: formData);
-      // print(response);
-      // if (response.statusCode == 200) isSuccessfull = true;
-    } catch (e) {
-      print(e);
-      isSuccessfull = false;
+
+      Response response;
+      response = await dio.post("/submit",
+          data: formData,
+          onSendProgress: showDownloadProgress,
+          options: new Options(
+            connectTimeout: 100000,
+            receiveTimeout: 100000,
+            contentType: ContentType.parse("application/x-www-form-urlencoded"),
+          ));
+      if (response.statusCode == 200) {
+        isSuccessfull = true;
+      }
+    } on DioError catch (e) {
+      // print(e.response.data ?? "no data");
+      print(e.response.headers);
+      print(e.response.request);
+      print(e.request);
+      print(e.message);
     }
     return isSuccessfull;
   }
 
-  Future<bool> upload(File file) async {
-    bool isSuccessfull;
-// {
-//   "iframeKey": "8c1a237b2b84212be113d71e194bd393",
-//   "apikey": "t0psycr3t3",
-//   "secret": "secret",
-//   "fields": [
-//     {
-//       "key": "first_name",
-//       "value": "videoupload"
-//     }, {
-//       "key": "larst_name",
-//       "value": "videoupload"
-//     }, {
-//       "key": "test",
-//       "value": "videoupload"
-//     }, {
-//       "key": "checkboxtest",
-//       "value": "true"
-//     }, {
-//       "key": "email_address",
-//       "value": "anvar.akramov@gmail.com"
+//   Future<bool> uploadDio(File file) async {
+//     var dio = Dio();
+//     bool isSuccessfull;
+
+//     Map<String, dynamic> body = {
+//       "iframeKey": "8c1a237b2b84212be113d71e194bd393",
+//       "apikey": "t0psycr3t3",
+//       "secret": "secret",
+//       "fields": [
+//         {"key": "first_name", "value": "videoupload"},
+//         {"key": "larst_name", "value": "videoupload"},
+//         {"key": "test", "value": "videoupload"},
+//         {"key": "checkboxtest", "value": "true"},
+//         {"key": "email_address", "value": "something@gmail.com"}
+//       ],
+//       "file": new UploadFileInfo(file, basename(file.path)),
+//     };
+
+//     try {
+//       // var response = await dio.post('$uploadApi',
+//       //     data: body,
+//       //     options: new Options(
+//       //         contentType:
+//       //             ContentType.parse("application/x-www-form-urlencoded")));
+
+//       // if (response.statusCode == 200) {
+//       //   isSuccessfull = true;
+//       // }
+//       // print(response);
+//       FormData formData = new FormData.from({
+//         "iframeKey": "8c1a237b2b84212be113d71e194bd393",
+//         "apikey": "t0psycr3t3",
+//         "secret": "secret",
+//         "fields": [
+//           {"key": "first_name", "value": "videoupload"},
+//           {"key": "larst_name", "value": "videoupload"},
+//           {"key": "test", "value": "videoupload"},
+//           {"key": "checkboxtest", "value": "true"},
+//           {"key": "email_address", "value": "something@gmail.com"}
+//         ],
+//         "file": new UploadFileInfo(file, basename(file.path)),
+//       });
+//       await dio.post("$uploadApi", data: formData);
+//       // print(response);
+//       // if (response.statusCode == 200) isSuccessfull = true;
+//     } catch (e) {
+//       print(e);
+//       isSuccessfull = false;
 //     }
-//   ]
-// }
+//     return isSuccessfull;
+//   }
 
-    try {
-      Map<String, String> fields = {
-        "apikey": "t0psycr3t3",
-        // "iframeKey": "2cda98e067ead6c88f4b560dcc2531bd",
-        "iframeKey": "8c1a237b2b84212be113d71e194bd393",
-        "first_name": "Durdona",
-        "last_name": "Bakhronova",
-        "email_address": "test@gmail.com",
-        "checkboxtest": "true",
-        "promotion_items": "aaaaaaaaaaa",
-        "secret": "secret"
-      };
-      // open a bytestream
-      var stream = new http.ByteStream(DelegatingStream.typed(file.openRead()));
-      // get file length
-      var length = await file.length();
-      print(length);
-      // string to uri
-      var uri = Uri.parse(uploadApi);
+//   Future<bool> upload(File file) async {
+//     bool isSuccessfull;
+// // {
+// //   "iframeKey": "8c1a237b2b84212be113d71e194bd393",
+// //   "apikey": "t0psycr3t3",
+// //   "secret": "secret",
+// //   "fields": [
+// //     {
+// //       "key": "first_name",
+// //       "value": "videoupload"
+// //     }, {
+// //       "key": "larst_name",
+// //       "value": "videoupload"
+// //     }, {
+// //       "key": "test",
+// //       "value": "videoupload"
+// //     }, {
+// //       "key": "checkboxtest",
+// //       "value": "true"
+// //     }, {
+// //       "key": "email_address",
+// //       "value": "anvar.akramov@gmail.com"
+// //     }
+// //   ]
+// // }
 
-      // create multipart request
-      var request = new http.MultipartRequest("POST", uri);
-      request.fields.addAll(fields);
+//     try {
+//       Map<String, String> fields = {
+//         "apikey": "t0psycr3t3",
+//         // "iframeKey": "2cda98e067ead6c88f4b560dcc2531bd",
+//         "iframeKey": "8c1a237b2b84212be113d71e194bd393",
+//         "first_name": "Durdona",
+//         "last_name": "Bakhronova",
+//         "email_address": "test@gmail.com",
+//         "checkboxtest": "true",
+//         "promotion_items": "aaaaaaaaaaa",
+//         "secret": "secret"
+//       };
+//       Map<String, dynamic> body = {
+//         "iframeKey": "8c1a237b2b84212be113d71e194bd393",
+//         "apikey": "t0psycr3t3",
+//         "secret": "secret",
+//         "fields": [
+//           {"key": "first_name", "value": "videoupload"},
+//           {"key": "larst_name", "value": "videoupload"},
+//           {"key": "test", "value": "videoupload"},
+//           {"key": "checkboxtest", "value": "true"},
+//           {"key": "email_address", "value": "something@gmail.com"}
+//         ],
+//       };
+//       // open a bytestream
+//       var stream = new http.ByteStream(DelegatingStream.typed(file.openRead()));
+//       // get file length
+//       var length = await file.length();
+//       print(length);
+//       // string to uri
+//       var uri = Uri.parse(uploadApi);
 
-      // multipart that takes file
-      var multipartFile = new http.MultipartFile('file', stream, length,
-          filename: basename(file.path));
+//       // create multipart request
+//       var request = new http.MultipartRequest("POST", uri);
+//       request.fields.addAll(body);
 
-      // add file to multipart
-      request.files.add(multipartFile);
-      // send
-      var response = await request.send().then((result) {
-        result.statusCode == 200 ? isSuccessfull = true : isSuccessfull = false;
-      });
-      print(response.statusCode);
+//       // multipart that takes file
+//       var multipartFile = new http.MultipartFile('file', stream, length,
+//           filename: basename(file.path));
 
-      // listen for response
-      response.stream.transform(utf8.decoder).listen((value) {
-        print(value);
-      });
-    } catch (e) {
-      //TODO: show flushbar/snackbar
-      print(e);
-    }
+//       // add file to multipart
+//       request.files.add(multipartFile);
+//       // send
+//       var response = await request.send().then((result) {
+//         result.statusCode == 200 ? isSuccessfull = true : isSuccessfull = false;
+//       });
+//       print(response.statusCode);
 
-    return isSuccessfull;
-  }
+//       // listen for response
+//       response.stream.transform(utf8.decoder).listen((value) {
+//         print(value);
+//       });
+//     } catch (e) {
+//       print(e);
+//     }
+
+//     return isSuccessfull;
+//   }
 
   ///[Siink]
   Sink<File> get addPicture => _addPictureController.sink;
@@ -374,10 +467,10 @@ class FileUploadBloc {
 
   final _removePhotoFromListController = StreamController<String>();
 
-  Sink<int> get getBottomVanigationValue =>
-      _getBottomVanigationValueController.sink;
+  Sink<int> get getBottomVanigationIndex =>
+      _getBottomVanigationIndexController.sink;
 
-  final _getBottomVanigationValueController = StreamController<int>();
+  final _getBottomVanigationIndexController = StreamController<int>();
 
   ///[Stream]
   // Stream<File> get getPictures => _getPicturesSubject.stream;
@@ -405,16 +498,21 @@ class FileUploadBloc {
 
   final _selectedFilesAsStringSubject = BehaviorSubject<List<String>>();
 
-  Stream<int> get bottomNavigationSelectedValue =>
-      bottomNavigationSelectedValueSubject.stream;
-
-  final bottomNavigationSelectedValueSubject = BehaviorSubject<int>();
-
   Stream<List<String>> get videosList => _videosListSubject.stream;
 
   final _videosListSubject = BehaviorSubject<List<String>>();
 
+  Stream<int> get navigationbarIndex => _navigationbarIndexSubject.stream;
+
+  final _navigationbarIndexSubject = BehaviorSubject<int>();
+
+  Stream<UploadFileDetailes> get downloadDetails =>
+      _downloadDetailsSubject.stream;
+
+  final _downloadDetailsSubject = BehaviorSubject<UploadFileDetailes>();
+
   FileUploadBloc() {
+    getEventPhotosFromServerList();
     addPhotosListToStream();
 
     // _addPictureController.stream.listen((picture) {
@@ -436,7 +534,6 @@ class FileUploadBloc {
       print(fileList);
       selectedFilesList.add(File(fileList[index]));
       selectedFilesAsStringList.add(fileList[index]);
-      _selectedFilesAsStringSubject.add(selectedFilesAsStringList);
       print(selectedFilesList);
     });
 
@@ -450,8 +547,9 @@ class FileUploadBloc {
       fileList.remove(image);
       _allFilesListSubject.add(fileList);
     });
-    _getBottomVanigationValueController.stream.listen((val) {
-      bottomNavigationSelectedValueSubject.add(val);
+    _getBottomVanigationIndexController.stream.listen((val) {
+      _navigationbarIndexSubject.add(val);
+      navigationIndex = val;
     });
   }
 
@@ -466,9 +564,10 @@ class FileUploadBloc {
     _removePhotoIndexFromSelectedController.close();
     _removePhotoFromListController.close();
     _selectedFilesAsStringSubject.close();
-    bottomNavigationSelectedValueSubject.close();
-    _getBottomVanigationValueController.close();
+    _getBottomVanigationIndexController.close();
+    _navigationbarIndexSubject.close();
     _videosListSubject.close();
     _photosListSubject.close();
+    _downloadDetailsSubject.close();
   }
 }

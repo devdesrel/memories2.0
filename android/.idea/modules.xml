@@ -5,13 +5,10 @@
       <module fileurl="file://$PROJECT_DIR$/android.iml" filepath="$PROJECT_DIR$/android.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://C:/flutter/.pub-cache/hosted/pub.dartlang.org/camera-0.2.9/android/camera.iml" filepath="C:/flutter/.pub-cache/hosted/pub.dartlang.org/camera-0.2.9/android/camera.iml" />
-      <module fileurl="file://C:/flutter/.pub-cache/hosted/pub.dartlang.org/geolocator-3.0.1/android/geolocator.iml" filepath="C:/flutter/.pub-cache/hosted/pub.dartlang.org/geolocator-3.0.1/android/geolocator.iml" />
-      <module fileurl="file://C:/flutter/.pub-cache/hosted/pub.dartlang.org/google_api_availability-2.0.0/android/google_api_availability.iml" filepath="C:/flutter/.pub-cache/hosted/pub.dartlang.org/google_api_availability-2.0.0/android/google_api_availability.iml" />
       <module fileurl="file://C:/flutter/.pub-cache/hosted/pub.dartlang.org/image_picker-0.4.10/android/image_picker.iml" filepath="C:/flutter/.pub-cache/hosted/pub.dartlang.org/image_picker-0.4.10/android/image_picker.iml" />
       <module fileurl="file://C:/flutter/.pub-cache/hosted/pub.dartlang.org/image_picker_saver-0.1.0/android/image_picker_saver.iml" filepath="C:/flutter/.pub-cache/hosted/pub.dartlang.org/image_picker_saver-0.1.0/android/image_picker_saver.iml" />
       <module fileurl="file://C:/flutter/.pub-cache/hosted/pub.dartlang.org/location-1.4.1/android/location.iml" filepath="C:/flutter/.pub-cache/hosted/pub.dartlang.org/location-1.4.1/android/location.iml" />
       <module fileurl="file://C:/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider-0.4.1/android/path_provider.iml" filepath="C:/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider-0.4.1/android/path_provider.iml" />
-      <module fileurl="file://C:/flutter/.pub-cache/hosted/pub.dartlang.org/permission_handler-3.0.0/android/permission_handler.iml" filepath="C:/flutter/.pub-cache/hosted/pub.dartlang.org/permission_handler-3.0.0/android/permission_handler.iml" />
       <module fileurl="file://C:/flutter/.pub-cache/hosted/pub.dartlang.org/simple_permissions-0.1.9/android/simple_permissions.iml" filepath="C:/flutter/.pub-cache/hosted/pub.dartlang.org/simple_permissions-0.1.9/android/simple_permissions.iml" />
       <module fileurl="file://C:/flutter/.pub-cache/hosted/pub.dartlang.org/video_player-0.6.5/android/video_player.iml" filepath="C:/flutter/.pub-cache/hosted/pub.dartlang.org/video_player-0.6.5/android/video_player.iml" />
     </modules>
