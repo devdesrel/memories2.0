@@ -3,19 +3,12 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker_saver/image_picker_saver.dart';
 import 'package:memories/models/model.dart';
 import 'package:memories/routes.dart';
-import 'package:memories/screens/photo_view.dart';
 import 'package:memories/screens/upload_files_page.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:simple_permissions/simple_permissions.dart';
 import 'package:video_player/video_player.dart';
-// import 'package:image_downloader/image_downloader.dart';
 
-// import 'package:image_picker_saver/image_picker_saver.dart';
-
-// Map<CameraLensDirection, CameraDescription> camerasMap = {};
 Map<CameraLensDirection, CameraDescription> camerasMap = {};
 
 class CameraScreen extends StatefulWidget {
@@ -47,50 +40,50 @@ class CameraScreen extends StatefulWidget {
   //     logError(e.code, e.description);
   //   }
   // }
-  static void startForEvent(BuildContext context, Promotion event) async {
-    // Fetch the available cameras before initializing the app.
-    SimplePermissions.checkPermission(Permission.Camera)
-        .then((permission) async {
-      if (!permission) {
-        SimplePermissions.requestPermission(Permission.Camera)
-            .then((permission) async {
-          if (permission == PermissionStatus.authorized) {
-            try {
-              List<CameraDescription> cameras = await availableCameras();
-              cameras.forEach(
-                  (camera) => camerasMap[camera.lensDirection] = camera);
-              Navigator.push(
-                  context,
-                  SlideTransitionPageRouteBuilder((BuildContext context,
-                          Animation<double> animation,
-                          Animation<double> secondaryAnimation) =>
-                      CameraScreen(
-                        event: event,
-                      )));
-            } on CameraException catch (e) {
-              logError(e.code, e.description);
-            }
-          }
-        });
-      } else {
-        try {
-          List<CameraDescription> cameras = await availableCameras();
-          cameras
-              .forEach((camera) => camerasMap[camera.lensDirection] = camera);
-          Navigator.push(
-              context,
-              SlideTransitionPageRouteBuilder((BuildContext context,
-                      Animation<double> animation,
-                      Animation<double> secondaryAnimation) =>
-                  CameraScreen(
-                    event: event,
-                  )));
-        } on CameraException catch (e) {
-          logError(e.code, e.description);
-        }
-      }
-    });
-  }
+  // static void startForEvent(BuildContext context, Promotion event) async {
+  //   // Fetch the available cameras before initializing the app.
+  //   SimplePermissions.checkPermission(Permission.Camera)
+  //       .then((permission) async {
+  //     if (!permission) {
+  //       SimplePermissions.requestPermission(Permission.Camera)
+  //           .then((permission) async {
+  //         if (permission == PermissionStatus.authorized) {
+  //           try {
+  //             List<CameraDescription> cameras = await availableCameras();
+  //             cameras.forEach(
+  //                 (camera) => camerasMap[camera.lensDirection] = camera);
+  //             Navigator.push(
+  //                 context,
+  //                 SlideTransitionPageRouteBuilder((BuildContext context,
+  //                         Animation<double> animation,
+  //                         Animation<double> secondaryAnimation) =>
+  //                     CameraScreen(
+  //                       event: event,
+  //                     )));
+  //           } on CameraException catch (e) {
+  //             logError(e.code, e.description);
+  //           }
+  //         }
+  //       });
+  //     } else {
+  //       try {
+  //         List<CameraDescription> cameras = await availableCameras();
+  //         cameras
+  //             .forEach((camera) => camerasMap[camera.lensDirection] = camera);
+  //         Navigator.push(
+  //             context,
+  //             SlideTransitionPageRouteBuilder((BuildContext context,
+  //                     Animation<double> animation,
+  //                     Animation<double> secondaryAnimation) =>
+  //                 CameraScreen(
+  //                   event: event,
+  //                 )));
+  //       } on CameraException catch (e) {
+  //         logError(e.code, e.description);
+  //       }
+  //     }
+  //   });
+  // }
 }
 
 void logError(String code, String message) =>

@@ -53,5 +53,8 @@
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>	
+	<key>NSAppTransportSecurity</key>
+  	<key>NSAllowsArbitraryLoads</key>
+  	<true/>
 </dict>
 </plist>

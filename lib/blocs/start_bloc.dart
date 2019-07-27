@@ -31,7 +31,7 @@ class StartBloc {
     return _currentLocation;
   }
 
-  Future<List<Promotion>> eventsApiRequest() async {
+  Future<List<Promotion>> getEvents() async {
     List<Promotion> _promotionList = [];
     var _location = await getLocation();
     if (_location != null) {
@@ -82,44 +82,39 @@ class StartBloc {
 
   final _listOfPromotionsSubject = BehaviorSubject<List<Promotion>>();
 
-  Stream<bool> get retryButton => _retryButtonSubject.stream;
-
-  Stream<bool> get startAnimationStatus => _startAnimationStatusSubject.stream;
-
-  final _startAnimationStatusSubject = BehaviorSubject<bool>(seedValue: true);
-
-  Stream<bool> get isGettingEventsFinished =>
-      _isGettingEventsFinishedSubject.stream;
-
-  final _isGettingEventsFinishedSubject = BehaviorSubject<bool>();
-
   final _retryButtonSubject = BehaviorSubject<bool>(seedValue: false);
 
   Sink<bool> get isRetryPressed => _isRetryPressedController.sink;
 
   final _isRetryPressedController = StreamController<bool>();
 
-  void getPromotions() {
-    eventsApiRequest().then((promotions) {
-      _listOfPromotionsSubject.add(promotions);
+  Stream<bool> get progressIndicatorStatus =>
+      _progressIndicatorStatusSubject.stream;
 
-      _isGettingEventsFinishedSubject.add(true);
+  final _progressIndicatorStatusSubject =
+      BehaviorSubject<bool>(seedValue: true);
+
+  void getPromotions() async {
+    await Future.value(getEvents().timeout(const Duration(milliseconds: 10000)))
+        .then((promotions) {
+      _listOfPromotionsSubject.add(promotions);
+      _progressIndicatorStatusSubject.add(false);
+      _retryButtonSubject.add(false);
     });
   }
 
   StartBloc() {
     getPromotions();
-
     _isRetryPressedController.stream.listen((isPressed) {
       if (isPressed) {
+        _progressIndicatorStatusSubject.add(true);
         getPromotions();
-        _retryButtonSubject.add(false);
       }
     });
   }
   dispose() {
     _listOfPromotionsSubject.close();
     _isRetryPressedController.close();
-    _startAnimationStatusSubject.close();
+    _progressIndicatorStatusSubject.close();
   }
 }
